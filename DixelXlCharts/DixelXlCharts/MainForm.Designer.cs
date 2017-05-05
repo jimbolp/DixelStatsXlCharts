@@ -34,6 +34,7 @@
             this.startWorking = new System.Windows.Forms.Button();
             this.resultLabel = new System.Windows.Forms.Label();
             this.sheetNameLabel = new System.Windows.Forms.Label();
+            this.debugTextBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -85,7 +86,7 @@
             this.resultLabel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.resultLabel.Location = new System.Drawing.Point(0, 159);
             this.resultLabel.Name = "resultLabel";
-            this.resultLabel.Size = new System.Drawing.Size(403, 132);
+            this.resultLabel.Size = new System.Drawing.Size(572, 132);
             this.resultLabel.TabIndex = 10;
             // 
             // sheetNameLabel
@@ -96,11 +97,21 @@
             this.sheetNameLabel.Size = new System.Drawing.Size(0, 13);
             this.sheetNameLabel.TabIndex = 11;
             // 
+            // debugTextBox
+            // 
+            this.debugTextBox.Dock = System.Windows.Forms.DockStyle.Right;
+            this.debugTextBox.Location = new System.Drawing.Point(431, 0);
+            this.debugTextBox.Name = "debugTextBox";
+            this.debugTextBox.Size = new System.Drawing.Size(141, 159);
+            this.debugTextBox.TabIndex = 13;
+            this.debugTextBox.Text = "";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(403, 291);
+            this.ClientSize = new System.Drawing.Size(572, 291);
+            this.Controls.Add(this.debugTextBox);
             this.Controls.Add(this.sheetNameLabel);
             this.Controls.Add(this.resultLabel);
             this.Controls.Add(this.startWorking);
@@ -122,6 +133,7 @@
         private System.Windows.Forms.Button startWorking;
         private System.Windows.Forms.Label resultLabel;
         private System.Windows.Forms.Label sheetNameLabel;
+        private System.Windows.Forms.RichTextBox debugTextBox;
     }
 }
 

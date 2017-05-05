@@ -9,13 +9,13 @@ using System.IO;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using System.Globalization;
+using System.Threading;
 
 namespace DixelXlCharts
 {    
     internal class DixelData
     {
-        const double chartHeigth = 521.0134; //18.23cm * 28.58
-        const double chartWidth = 867.9746; //30.37cm * 28.58
+        
         readonly bool printNeeded = false;
         string saveFileDir = null;
         Application xlApp = new Application();
@@ -76,96 +76,97 @@ namespace DixelXlCharts
             {
                 TempChartRanges(xlWSheet);
 
-                HumidChartRanges(xlWSheet);
+                //HumidChartRanges(xlWSheet);
             }
             releaseObject(xlWSheets);
+
+            //SaveAndClose();
         }
 
-        private void HumidChartRanges(Worksheet xlWsheet)
-        {
-            
-        }
-
-        private void TempChartRanges(Worksheet xlWSheet)
+        private void HumidChartRanges(Worksheet xlWSheet)
         {
             int startChartPositionLeft = 100;
             int startChartPositionTop = 100;
             ChartObjects xlChartObjs = xlWSheet.ChartObjects();
-
-            ChartRange ChRange = new ChartRange('T');
+            ChartRange ChRange = null;
             Range usedRange = xlWSheet.UsedRange;
-            Range DateRange = usedRange.Range[topDateCell, bottomDateCell];
-            Range DataRange = usedRange.Range[topDataCell, bottomDataCell];
+            try
+            {
+                ChRange = new ChartRange('H', usedRange, printNeeded);
+            }
+            catch (ArgumentException ae)
+            {
+                MessageBox.Show(ae.Message);
+                return;
+            }
             int usedRows = usedRange.Rows.Count;
             bool firstDateOFRange = true;
-            for(int i = 2; i <= usedRows; ++i)
+            CultureInfo cInfo = new CultureInfo("bg-BG");
+            cInfo.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            cInfo.DateTimeFormat.ShortTimePattern = "hh.mm.ss";
+            cInfo.DateTimeFormat.DateSeparator = "/";
+            DateTime date;
+            string currDateCell;
+            for (int i = 1; i <= usedRows; ++i)
             {
-                DateTime date;
-                string currDateCell = Convert.ToString((usedRange.Cells[i, 1] as Range).Value);
-                if (DateTime.TryParse(currDateCell, CultureInfo.InvariantCulture, DateTimeStyles.None, out date))
+                MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
+                currDateCell = Convert.ToString((usedRange.Cells[i, 1] as Range).Value, cInfo);
+                if (currDateCell.Contains("\'"))
+                    currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''));
+                if (DateTime.TryParse(currDateCell, cInfo, DateTimeStyles.None, out date))
                 {
-                    currDateCell = date.ToString("dd/MM/yyyy hh.mm.ss");
+                    //currDateCell = date.ToString("dd/MM/yyyy hh.mm.ss");
                     (usedRange.Cells[i, 1] as Range).ClearFormats();
-                    (usedRange.Cells[i, 1] as Range).Value = currDateCell;
-                    if (isMonday(currDateCell))
+                    (usedRange.Cells[i, 1] as Range).Value = "\'" + currDateCell;
+                    if (isFirstDayOfMonth(currDateCell, cInfo))
                     {
                         if (firstDateOFRange && i != usedRows)
                         {
-                            bottomDateCell = "A" + i;
-                            bottomDataCell = "B" + i;
+                            ChRange.ExpandRange(i);
                         }
                         else
                         {
-                            DateRange = usedRange.Range[topDateCell, bottomDateCell];
-                            DataRange = usedRange.Range[topDataCell, bottomDataCell];
-                            ChartObject xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
-                            Series xlChartSeries = xlChartObj.Chart.SeriesCollection().Add(DataRange);
-                            xlChartSeries.XValues = DateRange;
-                            CreateChartFromRange(DateRange, DataRange, xlChartObj, xlWSheet.Name + "_T");
+                            Thread chThread = new Thread(() =>
+                            {
+                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                            });
+                            chThread.Start();
+                            chThread.Join();
+                            
                             startChartPositionTop += 600;
-                            topDateCell = "A" + i;
-                            topDataCell = "B" + i;
-                            bottomDateCell = topDateCell;
-                            bottomDataCell = topDataCell;
+                            ChRange.StartNewRange(i);
                             firstDateOFRange = true;
                         }
                     }
                     else
                     {
-                        bottomDateCell = "A" + i;
-                        bottomDataCell = "B" + i;
+                        ChRange.ExpandRange(i);
                         firstDateOFRange = false;
-                        string nextCell;
+
                         if (i == usedRows)
                         {
-                            DateRange = usedRange.Range[topDateCell, bottomDateCell];
-                            DataRange = usedRange.Range[topDataCell, bottomDataCell];
-                            ChartObject xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
-                            Series xlChartSeries = xlChartObj.Chart.SeriesCollection().Add(DataRange);
-                            xlChartSeries.XValues = DateRange;
-                            CreateChartFromRange(DateRange, DataRange, xlChartObj, xlWSheet.Name + "_T");
+                            Thread chThread = new Thread(() =>
+                            {
+                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                            });
+                            chThread.Start();
+                            chThread.Join();
                             startChartPositionTop += 600;
-                            topDateCell = "A" + i;
-                            topDataCell = "B" + i;
-                            bottomDateCell = topDateCell;
-                            bottomDataCell = topDataCell;
+                            ChRange.StartNewRange(i);
                         }
                         else
                         {
-                            nextCell = Convert.ToString((usedRange.Cells[(i + 1), 1] as Range).Value);
-                            if (isMonday(nextCell))
+                            string nextCell = Convert.ToString((usedRange.Cells[(i + 1), 1] as Range).Value);
+                            if (isFirstDayOfMonth(nextCell, cInfo))
                             {
-                                DateRange = usedRange.Range[topDateCell, bottomDateCell];
-                                DataRange = usedRange.Range[topDataCell, bottomDataCell];
-                                ChartObject xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
-                                Series xlChartSeries = xlChartObj.Chart.SeriesCollection().Add(DataRange);
-                                xlChartSeries.XValues = DateRange;
-                                CreateChartFromRange(DateRange, DataRange, xlChartObj, xlWSheet.Name + "_T");
+                                Thread chThread = new Thread(() =>
+                                {
+                                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                                });
+                                chThread.Start();
+                                chThread.Join();
                                 startChartPositionTop += 600;
-                                topDateCell = "A" + i;
-                                topDataCell = "B" + i;
-                                bottomDateCell = topDateCell;
-                                bottomDataCell = topDataCell;
+                                ChRange.StartNewRange(i + 1);
                                 firstDateOFRange = true;
                             }
                         }
@@ -173,38 +174,161 @@ namespace DixelXlCharts
                 }
                 else
                 {
-                    DateRange = usedRange.Range[topDateCell, bottomDateCell];
-                    DataRange = usedRange.Range[topDataCell, bottomDataCell];
-                    ChartObject xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
-                    Series xlChartSeries = xlChartObj.Chart.SeriesCollection().Add(DataRange);
-                    xlChartSeries.XValues = DateRange;
-                    CreateChartFromRange(DateRange, DataRange, xlChartObj, xlWSheet.Name + "_T");
-                    startChartPositionTop += 600;
-                    topDateCell = "A" + i;
-                    topDataCell = "B" + i;
-                    bottomDateCell = topDateCell;
-                    bottomDataCell = topDataCell;
-                    firstDateOFRange = true;
+                    if (ChRange.EnoughDataForChart())
+                    {
+                        Thread chThread = new Thread(() =>
+                        {
+                            ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                        });
+                        chThread.Start();
+                        chThread.Join();
+                        startChartPositionTop += 600;
+                        ChRange.StartNewRange(i);
+                        firstDateOFRange = true;
+                    }
+                    ChRange.StartNewRange(i + 1);
+                }
+            }
+        }
+
+        private void TempChartRanges(Worksheet xlWSheet)
+        {
+            DateTime start = DateTime.Now;
+
+            int startChartPositionLeft = 100;
+            int startChartPositionTop = 100;
+            ChartObjects xlChartObjs = xlWSheet.ChartObjects();
+            ChartRange ChRange = null;            
+            Range usedRange = xlWSheet.UsedRange;
+            int time = 1;
+            
+            start = DateTime.Now;
+            try
+            {
+                ChRange = new ChartRange('T', usedRange, printNeeded);
+            }
+            catch (ArgumentException ae)
+            {
+                MessageBox.Show(ae.Message);
+                return;
+            }
+            int usedRows = usedRange.Rows.Count;
+            bool firstDateOFRange = true;
+            CultureInfo cInfo = new CultureInfo("bg-BG");
+            cInfo.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
+            cInfo.DateTimeFormat.ShortTimePattern = "hh.mm.ss";
+            cInfo.DateTimeFormat.DateSeparator = "/";
+            DateTime date;
+            string currDateCell;
+            
+            for (int i = 1; i <= usedRows; ++i)
+            {
+                MainForm.WriteIntoLabel(time + "| - 1 -> " + (DateTime.Now - start).ToString(), 2);
+                MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);      
+                currDateCell = Convert.ToString((usedRange.Cells[i, 1] as Range).Value);
+                if(currDateCell.Contains("\'"))
+                    currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''));
+                if (DateTime.TryParse(currDateCell, cInfo, DateTimeStyles.None, out date))
+                {
+                    (usedRange.Cells[i, 1] as Range).ClearFormats();
+                    (usedRange.Cells[i, 1] as Range).Value = "\'" + currDateCell;
+                    if (date.DayOfWeek == DayOfWeek.Monday)
+                    {
+                        if (firstDateOFRange && i != usedRows)
+                        {
+                            MainForm.WriteIntoLabel(time + "| - 2 -> " + (DateTime.Now - start).ToString(), 2);
+                            ChRange.ExpandRange(i);
+                        }
+                        else
+                        {
+                            MainForm.WriteIntoLabel(time + "| - 3 -> " + (DateTime.Now - start).ToString(), 2);
+                            Thread chThread = new Thread(() =>
+                            {
+                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                            });
+                            chThread.Start();
+                            chThread.Join();
+                            startChartPositionTop += 600;
+                            ChRange.StartNewRange(i);
+                            firstDateOFRange = true;
+                        }
+                    }
+                    else
+                    {
+                        MainForm.WriteIntoLabel(time + "| - 4 -> " + (DateTime.Now - start).ToString(), 2);
+                        ChRange.ExpandRange(i);
+                        firstDateOFRange = false;
+                        
+                        if (i == usedRows)
+                        {
+                            MainForm.WriteIntoLabel(time + "| - 5 -> " + (DateTime.Now - start).ToString(), 2);
+                            Thread chThread = new Thread(() =>
+                            {
+                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                            });
+                            chThread.Start();
+                            chThread.Join();
+                            startChartPositionTop += 600;
+                            ChRange.StartNewRange(i);
+                        }
+                        else
+                        {
+                            MainForm.WriteIntoLabel(time + "| - 6 -> " + (DateTime.Now - start).ToString(), 2);
+                            DateTime nextDate;
+                            string nextCell = Convert.ToString((usedRange.Cells[(i + 1), 1] as Range).Value);                            
+                            if (DateTime.TryParse(nextCell, out nextDate) && nextDate.DayOfWeek == DayOfWeek.Monday)
+                            {
+                                Thread chThread = new Thread(() =>
+                                {
+                                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                                });
+                                chThread.Start();
+                                chThread.Join();
+                                startChartPositionTop += 600;
+                                ChRange.StartNewRange(i + 1);
+                                firstDateOFRange = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    MainForm.WriteIntoLabel(time + "| - 7 -> " + (DateTime.Now - start).ToString(), 2);
+                    if (ChRange.EnoughDataForChart())
+                    {
+                        Thread chThread = new Thread(() =>
+                        {
+                            ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                        });
+                        chThread.Start();
+                        chThread.Join();
+                        startChartPositionTop += 600;
+                        ChRange.StartNewRange(i);
+                        firstDateOFRange = true;
+                    }
+                    ChRange.StartNewRange(i + 1);
+                }
+                if (ChRange.ChartNumber > time)
+                {
+                    time = ChRange.ChartNumber;
+                    start = DateTime.Now;
                 }
             }
         }
         
-        private void CreateChartFromRange(Range X_Series, Range Y_Series, ChartObject xlChartObj, string sheetName)
-        {
-
-            xlChartObj.Chart.ChartType = XlChartType.xlLine;
-            xlChartObj.Chart.HasTitle = true;
-            Chart xlChartPage = xlChartObj.Chart;
-            xlChartPage.ChartTitle.Text = sheetName;
-            xlChartPage.Legend.Delete();
-
-            if (printNeeded)
-                xlChartPage.PrintOut();
-        }
-        private bool isMonday(string date)
+        private bool isFirstDayOfMonth(string date, CultureInfo cInfo)
         {
             DateTime d;
-            if(DateTime.TryParse(date, out d) && d.DayOfWeek == DayOfWeek.Monday)
+            if (DateTime.TryParse(date, cInfo, DateTimeStyles.None, out d) && d.Day == 1)
+            {
+                return true;
+            }
+            return false;
+        }
+        private bool isMonday(string date, CultureInfo cInfo)
+        {
+            DateTime d;
+            if(DateTime.TryParse(date,cInfo, DateTimeStyles.None, out d) && d.DayOfWeek == DayOfWeek.Monday)
             {
                 return true;
             }
@@ -220,52 +344,21 @@ namespace DixelXlCharts
             return false;
         }
         public void SaveAndClose()
-        {
-            bool save = false;
+        {   
             string fullSavePath = null;
             try
             {
-                while (!save)
+                MainForm.SaveDialogBox(saveFileDir);
+                if(MainForm.SaveFilePath == null)
                 {
-                    var saveFileDialog = new SaveFileDialog
-                    {
-                        Filter = "Excel Workbook|*.xlsx; *.xlsm|Excel 97-2003 Workbook|*.xls",
-                        Title = "Save As",
-                        DefaultExt = "xlsx",
-                        InitialDirectory = saveFileDir
-                    };
-                    saveFileDialog.AddExtension = true;
-                    
-                    DialogResult dr = saveFileDialog.ShowDialog();
-                    if (dr == DialogResult.OK)
-                    {
-                        if (!File.Exists(saveFileDialog.FileName))
-                        {
-                            save = true;
-                            fullSavePath = saveFileDialog.FileName;
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            xlWBook.SaveAs(fullSavePath);
-                            xlWBook.Close(false);
-                            xlWBooks.Close();
-                            xlApp.Quit();
-                        }
-                        catch (COMException)
-                        {
-                            Dispose();
-                        }
-                        return;
-                    }
+                    return;
                 }
-                if (!string.IsNullOrEmpty(fullSavePath))
+                else
                 {
                     try
                     {
-                        xlWBook.SaveAs(fullSavePath);
+                        xlWBook.SaveAs(MainForm.SaveFilePath);
+                        MainForm.WriteIntoLabel("File saved successfully in \"" + fullSavePath + "\"", 1);
                         xlWBook.Close(false);
                         xlWBooks.Close();
                         xlApp.Quit();
@@ -274,7 +367,8 @@ namespace DixelXlCharts
                     {
                         Dispose();
                     }
-                }
+                    return;
+                }                
             }
             catch (COMException comEx)
             {
@@ -297,7 +391,7 @@ namespace DixelXlCharts
             }
             catch (InvalidComObjectException)
             {
-                MessageBox.Show("The application was already closed or there was a problem closing it!");
+                //MessageBox.Show("The application was already closed or there was a problem closing it!");
             }
             catch (COMException)
             {
