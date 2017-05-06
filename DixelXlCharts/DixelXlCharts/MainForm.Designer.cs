@@ -100,9 +100,9 @@
             // debugTextBox
             // 
             this.debugTextBox.Dock = System.Windows.Forms.DockStyle.Right;
-            this.debugTextBox.Location = new System.Drawing.Point(431, 0);
+            this.debugTextBox.Location = new System.Drawing.Point(395, 0);
             this.debugTextBox.Name = "debugTextBox";
-            this.debugTextBox.Size = new System.Drawing.Size(141, 159);
+            this.debugTextBox.Size = new System.Drawing.Size(177, 159);
             this.debugTextBox.TabIndex = 13;
             this.debugTextBox.Text = "";
             // 
