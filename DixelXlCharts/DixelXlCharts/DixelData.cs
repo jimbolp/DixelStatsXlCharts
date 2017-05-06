@@ -242,12 +242,7 @@ namespace DixelXlCharts
                         else
                         {
                             MainForm.WriteIntoLabel(time + "| - 3 -> " + (DateTime.Now - start).ToString(), 2);
-                            Thread chThread = new Thread(() =>
-                            {
-                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
-                            });
-                            chThread.Start();
-                            chThread.Join();
+                            ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                             startChartPositionTop += 600;
                             ChRange.StartNewRange(i);
                             firstDateOFRange = true;
@@ -262,12 +257,7 @@ namespace DixelXlCharts
                         if (i == usedRows)
                         {
                             MainForm.WriteIntoLabel(time + "| - 5 -> " + (DateTime.Now - start).ToString(), 2);
-                            Thread chThread = new Thread(() =>
-                            {
-                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
-                            });
-                            chThread.Start();
-                            chThread.Join();
+                            ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                             startChartPositionTop += 600;
                             ChRange.StartNewRange(i);
                         }
@@ -278,12 +268,7 @@ namespace DixelXlCharts
                             string nextCell = Convert.ToString((usedRange.Cells[(i + 1), 1] as Range).Value);                            
                             if (DateTime.TryParse(nextCell, out nextDate) && nextDate.DayOfWeek == DayOfWeek.Monday)
                             {
-                                Thread chThread = new Thread(() =>
-                                {
-                                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
-                                });
-                                chThread.Start();
-                                chThread.Join();
+                                ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                                 startChartPositionTop += 600;
                                 ChRange.StartNewRange(i + 1);
                                 firstDateOFRange = true;
@@ -296,12 +281,8 @@ namespace DixelXlCharts
                     MainForm.WriteIntoLabel(time + "| - 7 -> " + (DateTime.Now - start).ToString(), 2);
                     if (ChRange.EnoughDataForChart())
                     {
-                        Thread chThread = new Thread(() =>
-                        {
-                            ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
-                        });
-                        chThread.Start();
-                        chThread.Join();
+                        ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
+                        
                         startChartPositionTop += 600;
                         ChRange.StartNewRange(i);
                         firstDateOFRange = true;
