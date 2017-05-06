@@ -35,10 +35,10 @@ namespace DixelXlCharts
             {
                 // Create a delegate of this method and let the form run it.
                 this.Invoke(new EnableDelegate(WriteText), new object[] { text, l });
-                return; // Important
+                return;
             }
 
-            // Set textBox
+            // Set TextBox or RichTextBox
             switch (l)
             {
                 case 1:
@@ -104,7 +104,7 @@ namespace DixelXlCharts
             {
                 // Create a delegate of this method and let the form run it.
                 this.Invoke(new EnableDelegateSave(SaveBox), new object[] { saveFileDir });
-                return; // Important
+                return;
             }
             var saveFileDialog = new SaveFileDialog
             {
