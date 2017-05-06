@@ -44,8 +44,8 @@
             this.filePathTextBox.Name = "filePathTextBox";
             this.filePathTextBox.Size = new System.Drawing.Size(210, 20);
             this.filePathTextBox.TabIndex = 1;
-            this.filePathTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.filePathTextBox_DragDrop);
-            this.filePathTextBox.DragOver += new System.Windows.Forms.DragEventHandler(this.filePathTextBox_DragOver);
+            this.filePathTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilePathTextBox_DragDrop);
+            this.filePathTextBox.DragOver += new System.Windows.Forms.DragEventHandler(this.FilePathTextBox_DragOver);
             // 
             // graphicsCheckBox
             // 
@@ -56,7 +56,7 @@
             this.graphicsCheckBox.TabIndex = 8;
             this.graphicsCheckBox.Text = "Създаване на графики";
             this.graphicsCheckBox.UseVisualStyleBackColor = true;
-            this.graphicsCheckBox.CheckedChanged += new System.EventHandler(this.graphicsCheckBox_CheckedChanged);
+            this.graphicsCheckBox.CheckedChanged += new System.EventHandler(this.GraphicsCheckBox_CheckedChanged);
             // 
             // printCheckBox
             // 
@@ -77,7 +77,7 @@
             this.startWorking.TabIndex = 9;
             this.startWorking.Text = "Start";
             this.startWorking.UseVisualStyleBackColor = true;
-            this.startWorking.Click += new System.EventHandler(this.startWorking_Click);
+            this.startWorking.Click += new System.EventHandler(this.StartWorking_Click);
             // 
             // resultLabel
             // 

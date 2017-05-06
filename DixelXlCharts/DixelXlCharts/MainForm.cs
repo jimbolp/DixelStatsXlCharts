@@ -45,16 +45,17 @@ namespace DixelXlCharts
                     resultLabel.Text = text;
                     break;
                 case 2:
-                    debugTextBox.Text += text + Environment.NewLine;
+                    debugTextBox.Text = text;
+                    //debugTextBox.Text += text + Environment.NewLine;
                     break;
             }
         }
-        private void filePathTextBox_DragOver(object sender, DragEventArgs e)
+        private void FilePathTextBox_DragOver(object sender, DragEventArgs e)
         {
             e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
         }
 
-        private void filePathTextBox_DragDrop(object sender, DragEventArgs e)
+        private void FilePathTextBox_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null && files.Length != 0)
@@ -63,7 +64,7 @@ namespace DixelXlCharts
             }
         }
 
-        private void startWorking_Click(object sender, EventArgs e)
+        private void StartWorking_Click(object sender, EventArgs e)
         {
 
             DixelData dxData = null;
@@ -120,7 +121,7 @@ namespace DixelXlCharts
                 SaveFilePath = saveFileDialog.FileName;
             }
         }
-        private void graphicsCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void GraphicsCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (graphicsCheckBox.Checked)
             {

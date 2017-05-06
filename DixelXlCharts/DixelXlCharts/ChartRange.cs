@@ -41,7 +41,7 @@ namespace DixelXlCharts
             DateRange = usedRange.Range[topDateCell, bottomDateCell];
             DataRange = usedRange.Range[topDataCell, bottomDataCell];
         }
-
+        /*
         public object TopDate {
             get
             {
@@ -85,19 +85,20 @@ namespace DixelXlCharts
                 bottomDataCell = col + value.ToString();
             }
         }
+        //*/
         public void ExpandRange(int row)
         {
             RowOfRange++;
-            BottomDate = row;
-            BottomData = row;
+            bottomDateCell = "A" + row;
+            bottomDataCell = col.ToString() + row;
         }
         public void StartNewRange(int row)
         {
             RowOfRange = 1;
-            TopDate = row;
-            TopData = row;
-            BottomDate = row;
-            BottomData = row;
+            topDateCell = "A" + row;
+            topDataCell = col.ToString() + row;
+            bottomDateCell = "A" + row;
+            bottomDataCell = col.ToString() + row;
         }
         public void CreateChart(ChartObjects xlChartObjs, string Name, double startChartPositionLeft, double startChartPositionTop)
         {
@@ -113,9 +114,14 @@ namespace DixelXlCharts
             xlChartPage.HasTitle = true;
             xlChartPage.ChartTitle.Text = Name;
             xlChartPage.Legend.Delete();
-
+            
             if (printNeeded)
                 xlChartPage.PrintOut();
+
+            DateRange = null;
+            DataRange = null;
+            Marshal.ReleaseComObject(xlChartObj);
+            xlChartObj = null;
         }
         public bool EnoughDataForChart()
         {
