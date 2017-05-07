@@ -28,6 +28,7 @@ namespace DixelXlCharts
             chartProgBar.CreateGraphics().TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             this.UpdateStyles();
             form = this;
+            Icon = Resources.icons._002_analytics_1;
         }
         public static void ProgressBar(int val, bool max)
         {

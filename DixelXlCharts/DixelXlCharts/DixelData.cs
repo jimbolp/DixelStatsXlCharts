@@ -153,7 +153,7 @@ namespace DixelXlCharts
             {
                 MainForm.ProgressBar(i, false);
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
-                currDateCell = Convert.ToString(xlRangeArr[i, 1], cInfo);
+                currDateCell = Convert.ToString(xlRangeArr[i, 1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if (currDateCell.Contains("\'"))
                     currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''), 1);
                 DateTime date;
@@ -251,7 +251,7 @@ namespace DixelXlCharts
             {
                 MainForm.ProgressBar(i, false);
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);      
-                currDateCell = Convert.ToString(xlRangeArr[i,1]);
+                currDateCell = Convert.ToString(xlRangeArr[i,1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if(currDateCell.Contains("\'"))
                     currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''),1);
                 DateTime date;
@@ -285,7 +285,8 @@ namespace DixelXlCharts
                         else
                         {
                             string nextCell = Convert.ToString(xlRangeArr[i+1, 1]);
-                            if (DateTime.TryParse(nextCell, out DateTime nextDate) && nextDate.DayOfWeek == DayOfWeek.Monday)
+                            DateTime nextDate;
+                            if (DateTime.TryParse(nextCell, out nextDate) && nextDate.DayOfWeek == DayOfWeek.Monday)
                             {
                                 ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                                 startChartPositionTop += 600;
@@ -318,13 +319,11 @@ namespace DixelXlCharts
             for (int i = 1; i <= usedRange.Rows.Count; ++i)
             {
                 MainForm.ConvProgBar(i, false);
-                //MainForm.WriteIntoLabel(i.ToString(), 2);
-                for (int j = 1; j <= usedRange.Columns.Count; ++j)
-                {
+                
                     DateTime d;
-                    if (DateTime.TryParse(xlNewRange[i, j].ToString(), out d))
-                        xlNewRange[i, j] = "\'" + xlNewRange[i, j];
-                }
+                    if (DateTime.TryParse(xlNewRange[i, 1].ToString(), out d))
+                        xlNewRange[i, 1] = "\'" + xlNewRange[i, 1];
+                
             }
             usedRange.Value = xlNewRange;
             //MainForm.ConvProgBar(0, true);
