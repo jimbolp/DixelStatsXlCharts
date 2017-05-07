@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.filePathTextBox = new System.Windows.Forms.TextBox();
             this.graphicsCheckBox = new System.Windows.Forms.CheckBox();
             this.printCheckBox = new System.Windows.Forms.CheckBox();
@@ -35,6 +36,10 @@
             this.resultLabel = new System.Windows.Forms.Label();
             this.sheetNameLabel = new System.Windows.Forms.Label();
             this.debugTextBox = new System.Windows.Forms.RichTextBox();
+            this.chartProgBar = new System.Windows.Forms.ProgressBar();
+            this.convertProgBar = new System.Windows.Forms.ProgressBar();
+            this.labelConverting = new System.Windows.Forms.Label();
+            this.labelCharts = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -83,10 +88,9 @@
             // 
             this.resultLabel.AutoEllipsis = true;
             this.resultLabel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.resultLabel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.resultLabel.Location = new System.Drawing.Point(0, 159);
+            this.resultLabel.Location = new System.Drawing.Point(0, 355);
             this.resultLabel.Name = "resultLabel";
-            this.resultLabel.Size = new System.Drawing.Size(572, 132);
+            this.resultLabel.Size = new System.Drawing.Size(326, 132);
             this.resultLabel.TabIndex = 10;
             // 
             // sheetNameLabel
@@ -99,18 +103,67 @@
             // 
             // debugTextBox
             // 
-            this.debugTextBox.Dock = System.Windows.Forms.DockStyle.Right;
-            this.debugTextBox.Location = new System.Drawing.Point(395, 0);
+            this.debugTextBox.Location = new System.Drawing.Point(533, 311);
             this.debugTextBox.Name = "debugTextBox";
-            this.debugTextBox.Size = new System.Drawing.Size(177, 159);
+            this.debugTextBox.Size = new System.Drawing.Size(177, 173);
             this.debugTextBox.TabIndex = 13;
             this.debugTextBox.Text = "";
+            // 
+            // chartProgBar
+            // 
+            this.chartProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.chartProgBar.Location = new System.Drawing.Point(0, 167);
+            this.chartProgBar.Name = "chartProgBar";
+            this.chartProgBar.Size = new System.Drawing.Size(383, 23);
+            this.chartProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.chartProgBar.TabIndex = 14;
+            // 
+            // convertProgBar
+            // 
+            this.convertProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.convertProgBar.Location = new System.Drawing.Point(0, 144);
+            this.convertProgBar.Name = "convertProgBar";
+            this.convertProgBar.Size = new System.Drawing.Size(383, 23);
+            this.convertProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.convertProgBar.TabIndex = 15;
+            // 
+            // labelConverting
+            // 
+            this.labelConverting.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelConverting.AutoSize = true;
+            this.labelConverting.BackColor = System.Drawing.Color.Transparent;
+            this.labelConverting.Enabled = false;
+            this.labelConverting.Location = new System.Drawing.Point(5, 149);
+            this.labelConverting.Name = "labelConverting";
+            this.labelConverting.Size = new System.Drawing.Size(54, 13);
+            this.labelConverting.TabIndex = 16;
+            this.labelConverting.Text = "Loading...";
+            this.labelConverting.Visible = false;
+            // 
+            // labelCharts
+            // 
+            this.labelCharts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelCharts.AutoSize = true;
+            this.labelCharts.BackColor = System.Drawing.Color.Transparent;
+            this.labelCharts.Enabled = false;
+            this.labelCharts.Location = new System.Drawing.Point(5, 171);
+            this.labelCharts.Name = "labelCharts";
+            this.labelCharts.Size = new System.Drawing.Size(54, 13);
+            this.labelCharts.TabIndex = 17;
+            this.labelCharts.Text = "Loading...";
+            this.labelCharts.Visible = false;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(572, 291);
+            this.ClientSize = new System.Drawing.Size(383, 190);
+            this.Controls.Add(this.labelCharts);
+            this.Controls.Add(this.labelConverting);
+            this.Controls.Add(this.convertProgBar);
+            this.Controls.Add(this.chartProgBar);
             this.Controls.Add(this.debugTextBox);
             this.Controls.Add(this.sheetNameLabel);
             this.Controls.Add(this.resultLabel);
@@ -118,6 +171,7 @@
             this.Controls.Add(this.graphicsCheckBox);
             this.Controls.Add(this.printCheckBox);
             this.Controls.Add(this.filePathTextBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "Създаване на графики";
             this.ResumeLayout(false);
@@ -134,6 +188,10 @@
         private System.Windows.Forms.Label resultLabel;
         private System.Windows.Forms.Label sheetNameLabel;
         private System.Windows.Forms.RichTextBox debugTextBox;
+        private System.Windows.Forms.ProgressBar chartProgBar;
+        private System.Windows.Forms.ProgressBar convertProgBar;
+        private System.Windows.Forms.Label labelConverting;
+        private System.Windows.Forms.Label labelCharts;
     }
 }
 
