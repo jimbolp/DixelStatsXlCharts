@@ -98,9 +98,10 @@ namespace DixelXlCharts
                     Thread tr = new Thread(() =>
                     {
                         ConvertDateCellsToText(xlWSheet.UsedRange);
-                        TempChartRanges(xlWSheet);
-
-                        HumidChartRanges(xlWSheet);
+                        if(MainForm.TempCharts)
+                            TempChartRanges(xlWSheet);
+                        if(MainForm.HumidCharts)
+                            HumidChartRanges(xlWSheet);
 
                     });
                     tr.Start();
@@ -323,7 +324,6 @@ namespace DixelXlCharts
                     DateTime d;
                     if (DateTime.TryParse(xlNewRange[i, 1].ToString(), out d))
                         xlNewRange[i, 1] = "\'" + xlNewRange[i, 1];
-                
             }
             usedRange.Value = xlNewRange;
             //MainForm.ConvProgBar(0, true);

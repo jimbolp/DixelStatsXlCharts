@@ -38,8 +38,8 @@
             this.debugTextBox = new System.Windows.Forms.RichTextBox();
             this.chartProgBar = new System.Windows.Forms.ProgressBar();
             this.convertProgBar = new System.Windows.Forms.ProgressBar();
-            this.labelConverting = new System.Windows.Forms.Label();
-            this.labelCharts = new System.Windows.Forms.Label();
+            this.tempChckBox = new System.Windows.Forms.CheckBox();
+            this.humidChckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -67,7 +67,7 @@
             // 
             this.printCheckBox.AutoSize = true;
             this.printCheckBox.Enabled = false;
-            this.printCheckBox.Location = new System.Drawing.Point(12, 81);
+            this.printCheckBox.Location = new System.Drawing.Point(12, 120);
             this.printCheckBox.Name = "printCheckBox";
             this.printCheckBox.Size = new System.Drawing.Size(138, 17);
             this.printCheckBox.TabIndex = 7;
@@ -112,7 +112,7 @@
             // chartProgBar
             // 
             this.chartProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.chartProgBar.Location = new System.Drawing.Point(0, 167);
+            this.chartProgBar.Location = new System.Drawing.Point(0, 208);
             this.chartProgBar.Name = "chartProgBar";
             this.chartProgBar.Size = new System.Drawing.Size(383, 23);
             this.chartProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -121,47 +121,43 @@
             // convertProgBar
             // 
             this.convertProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.convertProgBar.Location = new System.Drawing.Point(0, 144);
+            this.convertProgBar.Location = new System.Drawing.Point(0, 185);
             this.convertProgBar.Name = "convertProgBar";
             this.convertProgBar.Size = new System.Drawing.Size(383, 23);
             this.convertProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.convertProgBar.TabIndex = 15;
             // 
-            // labelConverting
+            // tempChckBox
             // 
-            this.labelConverting.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelConverting.AutoSize = true;
-            this.labelConverting.BackColor = System.Drawing.Color.Transparent;
-            this.labelConverting.Enabled = false;
-            this.labelConverting.Location = new System.Drawing.Point(5, 149);
-            this.labelConverting.Name = "labelConverting";
-            this.labelConverting.Size = new System.Drawing.Size(54, 13);
-            this.labelConverting.TabIndex = 16;
-            this.labelConverting.Text = "Loading...";
-            this.labelConverting.Visible = false;
+            this.tempChckBox.AutoSize = true;
+            this.tempChckBox.Enabled = false;
+            this.tempChckBox.Location = new System.Drawing.Point(21, 81);
+            this.tempChckBox.Name = "tempChckBox";
+            this.tempChckBox.Size = new System.Drawing.Size(93, 17);
+            this.tempChckBox.TabIndex = 18;
+            this.tempChckBox.Text = "Температура";
+            this.tempChckBox.UseVisualStyleBackColor = true;
+            this.tempChckBox.CheckedChanged += new System.EventHandler(this.tempChckBox_CheckedChanged);
             // 
-            // labelCharts
+            // humidChckBox
             // 
-            this.labelCharts.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelCharts.AutoSize = true;
-            this.labelCharts.BackColor = System.Drawing.Color.Transparent;
-            this.labelCharts.Enabled = false;
-            this.labelCharts.Location = new System.Drawing.Point(5, 171);
-            this.labelCharts.Name = "labelCharts";
-            this.labelCharts.Size = new System.Drawing.Size(54, 13);
-            this.labelCharts.TabIndex = 17;
-            this.labelCharts.Text = "Loading...";
-            this.labelCharts.Visible = false;
+            this.humidChckBox.AutoSize = true;
+            this.humidChckBox.Enabled = false;
+            this.humidChckBox.Location = new System.Drawing.Point(21, 97);
+            this.humidChckBox.Name = "humidChckBox";
+            this.humidChckBox.Size = new System.Drawing.Size(76, 17);
+            this.humidChckBox.TabIndex = 19;
+            this.humidChckBox.Text = "Влажност";
+            this.humidChckBox.UseVisualStyleBackColor = true;
+            this.humidChckBox.CheckedChanged += new System.EventHandler(this.humidChckBox_CheckedChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(383, 190);
-            this.Controls.Add(this.labelCharts);
-            this.Controls.Add(this.labelConverting);
+            this.ClientSize = new System.Drawing.Size(383, 231);
+            this.Controls.Add(this.humidChckBox);
+            this.Controls.Add(this.tempChckBox);
             this.Controls.Add(this.convertProgBar);
             this.Controls.Add(this.chartProgBar);
             this.Controls.Add(this.debugTextBox);
@@ -190,8 +186,8 @@
         private System.Windows.Forms.RichTextBox debugTextBox;
         private System.Windows.Forms.ProgressBar chartProgBar;
         private System.Windows.Forms.ProgressBar convertProgBar;
-        private System.Windows.Forms.Label labelConverting;
-        private System.Windows.Forms.Label labelCharts;
+        private System.Windows.Forms.CheckBox tempChckBox;
+        private System.Windows.Forms.CheckBox humidChckBox;
     }
 }
 

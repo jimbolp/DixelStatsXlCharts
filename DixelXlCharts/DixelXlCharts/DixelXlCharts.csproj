@@ -38,6 +38,9 @@
   <PropertyGroup>
     <ApplicationIcon>my-icons-collection\001-analytics-2.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>DixelXlCharts.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />

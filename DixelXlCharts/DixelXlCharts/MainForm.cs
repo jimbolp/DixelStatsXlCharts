@@ -18,11 +18,17 @@ namespace DixelXlCharts
         private bool isProcessRunning = false;
         private delegate void EnableDelegateSave(string text);
         private delegate void EnableDelegateProgBar(int val, bool max);
+
+        public static bool TempCharts { get; set; }
+        public static bool HumidCharts { get; set; }
         public static string SaveFilePath { get; set; } = null;
         private string loadedFile = "";
         public MainForm()
         {
             InitializeComponent();
+            graphicsCheckBox.Checked = true;
+            TempCharts = tempChckBox.Checked;
+            HumidCharts = humidChckBox.Checked;
             this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint, true);
             convertProgBar.CreateGraphics().TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
             chartProgBar.CreateGraphics().TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
@@ -32,18 +38,14 @@ namespace DixelXlCharts
         }
         public static void ProgressBar(int val, bool max)
         {
-            if(form != null)
-            {
-                form.ProgBar(val, max);
-            }
+            form?.ProgBar(val, max);
         }
+
         public static void ConvProgBar(int val, bool max)
         {
-            if (form != null)
-            {
-                form.CProgBar(val, max);
-            }
+            form?.CProgBar(val, max);
         }
+
         private void CProgBar(int val, bool max)
         {
             if (InvokeRequired)
@@ -69,11 +71,6 @@ namespace DixelXlCharts
                             int percent = (int)(((double)convertProgBar.Value / (double)convertProgBar.Maximum) * 100);
                             convertProgBar.CreateGraphics().DrawString(percent.ToString() + "% Converting...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(convertProgBar.Width / 2 - 35, convertProgBar.Height / 2 - 7));
                             
-                            //labelConverting.Text = (int)(((double)convertProgBar.Value / (double)convertProgBar.Maximum )* 100) + "% Converting cells...";
-                        }
-                        else
-                        {
-                            //labelConverting.Text = "Loading...";
                         }
                         convertProgBar.Value = val;
                     }
@@ -164,6 +161,26 @@ namespace DixelXlCharts
                 MessageBox.Show("The process is already running!!");
                 return;
             }
+            if (!graphicsCheckBox.Checked)
+            {
+                DialogResult dr =
+                    MessageBox.Show(
+                        "Не сте избрали опцията за създаване на графики! Сигурни ли сте, че искате да се създадат графики?",
+                        "Внимание!", MessageBoxButtons.YesNo);
+                if (dr == DialogResult.No)
+                {
+                    return;
+                }
+                graphicsCheckBox.Checked = true;
+            }
+            else
+            {
+                if (!tempChckBox.Checked && !humidChckBox.Checked)
+                {
+                    MessageBox.Show("Изберете \"Температура\", \"Влажност\" или и двете!");
+                    return;
+                }
+            }
             DixelData dxData = null;
             try
             {
@@ -197,10 +214,8 @@ namespace DixelXlCharts
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
-            if(dxData != null)
-            {
-                dxData.Dispose();
-            }
+            dxData?.Dispose();
+            
             isProcessRunning = false;
         }
         public static string SaveDialogBox(string saveFileDir)
@@ -258,12 +273,30 @@ namespace DixelXlCharts
             if (graphicsCheckBox.Checked)
             {
                 printCheckBox.Enabled = true;
+                tempChckBox.Enabled = true;
+                tempChckBox.Checked = true;
+                humidChckBox.Enabled = true;
+                humidChckBox.Checked = true;
             }
             else
             {
                 printCheckBox.Checked = false;
                 printCheckBox.Enabled = false;
+                tempChckBox.Checked = false;
+                humidChckBox.Checked = false;
+                tempChckBox.Enabled = false;
+                humidChckBox.Enabled = false;
             }
+        }
+
+        private void tempChckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            TempCharts = tempChckBox.Checked;
+        }
+
+        private void humidChckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            HumidCharts = humidChckBox.Checked;
         }
     }
 }
