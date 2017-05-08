@@ -75,7 +75,8 @@ namespace DixelXlCharts
         }
         public void LoadData()
         {
-            List<Thread> treads = new List<Thread>();
+            List<Thread> treadsCharts = new List<Thread>();
+            List<Thread> treadsConv = new List<Thread>();
             Thread load = new Thread(() =>
             {
             //DateTime start = DateTime.Now;
@@ -93,9 +94,15 @@ namespace DixelXlCharts
                     throw;
                 }
 
+                MainForm.ConvProgBar(1, true);
                 foreach (Worksheet xlWSheet in xlWSheets)
                 {
-                    Thread tr = new Thread(() =>
+                    if (MainForm.isCancellationRequested)
+                    {
+                        Dispose();
+                        return;
+                    }
+                    Thread trCharts = new Thread(() =>
                     {
                         ConvertDateCellsToText(xlWSheet.UsedRange);
                         if(MainForm.TempCharts)
@@ -104,31 +111,43 @@ namespace DixelXlCharts
                             HumidChartRanges(xlWSheet);
 
                     });
-                    tr.Start();
-                    treads.Add(tr);
+                    trCharts.Start();
+                    treadsCharts.Add(trCharts);
                 }
-                foreach (Thread t in treads)
+                foreach (Thread t in treadsCharts)
                 {
                     t.Join();
                 }
-            //MainForm.WriteIntoLabel((DateTime.Now - start).ToString(), 2);
-        });
+            });
             load.Start();
-            load.Join();
-                                      
+            load.Join();            
         }
 
         private void HumidChartRanges(Worksheet xlWSheet)
         {
+            if (MainForm.isCancellationRequested)
+            {
+                Dispose();
+                return;
+            }
             int startChartPositionLeft = 100;
             int startChartPositionTop = 100;
-            ChartObjects xlChartObjs = xlWSheet.ChartObjects();
+            ChartObjects xlChartObjs;
+            try
+            {
+                xlChartObjs = xlWSheet.ChartObjects();
+            }
+            catch (Exception)
+            {
+                Dispose();
+                return;
+            }
             ChartRange ChRange = null;
             Range usedRange = xlWSheet.UsedRange;
             Range firstCol = usedRange.Columns[1];
             try
             {
-                ChRange = new ChartRange('H', usedRange, printNeeded);
+                ChRange = new ChartRange('H', usedRange, printNeeded, MainForm.SpecialCase);
             }
             catch (ArgumentException ae)
             {
@@ -136,12 +155,8 @@ namespace DixelXlCharts
                 return;
             }
             int usedRows = usedRange.Rows.Count;
-            Thread progBar = new Thread(() =>
-            {
-                MainForm.ProgressBar(usedRows, true);
-            });
-            progBar.Start();
-            progBar.Join();
+            MainForm.ProgressBar(usedRows, true);
+            
             bool firstDateOFRange = true;
             CultureInfo cInfo = new CultureInfo("bg-BG");
             cInfo.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
@@ -152,7 +167,13 @@ namespace DixelXlCharts
             
             for (int i = 1; i <= usedRows; ++i)
             {
+                if (MainForm.isCancellationRequested)
+                {
+                    Dispose();
+                    return;
+                }
                 MainForm.ProgressBar(i, false);
+                
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
                 currDateCell = Convert.ToString(xlRangeArr[i, 1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if (currDateCell.Contains("\'"))
@@ -216,16 +237,32 @@ namespace DixelXlCharts
 
         private void TempChartRanges(Worksheet xlWSheet)
         {
+            if (MainForm.isCancellationRequested)
+            {
+                Dispose();
+                return;
+            }
             int startChartPositionLeft = 100;
             int startChartPositionTop = 100;
-            ChartObjects xlChartObjs = xlWSheet.ChartObjects();
+            ChartObjects xlChartObjs;
+            Range usedRange;
+            Range firstCol;
+            try
+            {
+                xlChartObjs = xlWSheet.ChartObjects();
+                usedRange = xlWSheet.UsedRange;
+                firstCol = usedRange.Columns[1];
+            }
+            catch (Exception)
+            {
+                Dispose();
+                return;
+            }
             ChartRange ChRange = null;            
-            Range usedRange = xlWSheet.UsedRange;
-            Range firstCol = usedRange.Columns[1];
 
             try
             {
-                ChRange = new ChartRange('T', usedRange, printNeeded);
+                ChRange = new ChartRange('T', usedRange, printNeeded, MainForm.SpecialCase);
             }
             catch (ArgumentException ae)
             {
@@ -233,12 +270,9 @@ namespace DixelXlCharts
                 return;
             }
             int usedRows = usedRange.Rows.Count;
-            Thread progBar = new Thread(() =>
-            {
-                MainForm.ProgressBar(usedRows, true);
-            });
-            progBar.Start();
-            progBar.Join();
+            
+            MainForm.ProgressBar(usedRows, true);
+            
             bool firstDateOFRange = true;
             CultureInfo cInfo = new CultureInfo("bg-BG");
             cInfo.DateTimeFormat.ShortDatePattern = "dd/MM/yyyy";
@@ -250,8 +284,12 @@ namespace DixelXlCharts
             
             for (int i = 1; i <= usedRows; ++i)
             {
-                MainForm.ProgressBar(i, false);
-                //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);      
+                if (MainForm.isCancellationRequested)
+                {
+                    Dispose();
+                    return;
+                }
+                MainForm.ProgressBar(i, false);    
                 currDateCell = Convert.ToString(xlRangeArr[i,1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if(currDateCell.Contains("\'"))
                     currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''),1);
@@ -313,12 +351,16 @@ namespace DixelXlCharts
         }
         private void ConvertDateCellsToText(Range usedRange)
         {
-            MainForm.ConvProgBar(0, true);
             MainForm.ConvProgBar(usedRange.Rows.Count, true);
 
             object[,] xlNewRange = usedRange.Value;
             for (int i = 1; i <= usedRange.Rows.Count; ++i)
             {
+                if (MainForm.isCancellationRequested)
+                {
+                    Dispose();
+                    return;
+                }
                 MainForm.ConvProgBar(i, false);
                 
                     DateTime d;
@@ -377,7 +419,8 @@ namespace DixelXlCharts
                         MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
-                        xlApp.Quit();                        
+                        //xlApp.Quit();
+                        Dispose();
                     }
                     catch (COMException)
                     {
@@ -391,12 +434,16 @@ namespace DixelXlCharts
                 MessageBox.Show("An exception was thrown while saving the file:" +
                     Environment.NewLine +
                     comEx.ToString());
+                xlApp.Quit();
+                Dispose();
             }
             catch (Exception e)
             {
                 MessageBox.Show("An exception was thrown while saving the file:" +
                     Environment.NewLine +
                     e.ToString());
+                xlApp.Quit();
+                Dispose();
             }
         }
         public void Dispose()
@@ -407,15 +454,18 @@ namespace DixelXlCharts
             }
             catch (InvalidComObjectException)
             {
+                MainForm.isCancellationRequested = false;
                 //File probably already closed :D :D
             }
             catch (Exception)
             {
+                MainForm.isCancellationRequested = false;
                 MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
             }
             ReleaseObject(xlWBook);
             ReleaseObject(xlWBooks);
             ReleaseObject(xlApp);
+            MainForm.isCancellationRequested = false;
         }
         private void ReleaseObject(object obj)
         {

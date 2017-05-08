@@ -40,6 +40,9 @@
             this.convertProgBar = new System.Windows.Forms.ProgressBar();
             this.tempChckBox = new System.Windows.Forms.CheckBox();
             this.humidChckBox = new System.Windows.Forms.CheckBox();
+            this.specialChckBox = new System.Windows.Forms.CheckBox();
+            this.specialTip = new System.Windows.Forms.ToolTip();
+            this.browseFileBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -47,7 +50,7 @@
             this.filePathTextBox.AllowDrop = true;
             this.filePathTextBox.Location = new System.Drawing.Point(12, 32);
             this.filePathTextBox.Name = "filePathTextBox";
-            this.filePathTextBox.Size = new System.Drawing.Size(210, 20);
+            this.filePathTextBox.Size = new System.Drawing.Size(232, 20);
             this.filePathTextBox.TabIndex = 1;
             this.filePathTextBox.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilePathTextBox_DragDrop);
             this.filePathTextBox.DragOver += new System.Windows.Forms.DragEventHandler(this.FilePathTextBox_DragOver);
@@ -67,7 +70,7 @@
             // 
             this.printCheckBox.AutoSize = true;
             this.printCheckBox.Enabled = false;
-            this.printCheckBox.Location = new System.Drawing.Point(12, 120);
+            this.printCheckBox.Location = new System.Drawing.Point(12, 143);
             this.printCheckBox.Name = "printCheckBox";
             this.printCheckBox.Size = new System.Drawing.Size(138, 17);
             this.printCheckBox.TabIndex = 7;
@@ -76,12 +79,15 @@
             // 
             // startWorking
             // 
+            this.startWorking.BackColor = System.Drawing.Color.Transparent;
+            this.startWorking.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.startWorking.Image = ((System.Drawing.Image)(resources.GetObject("startWorking.Image")));
             this.startWorking.Location = new System.Drawing.Point(275, 32);
             this.startWorking.Name = "startWorking";
             this.startWorking.Size = new System.Drawing.Size(76, 66);
             this.startWorking.TabIndex = 9;
-            this.startWorking.Text = "Start";
-            this.startWorking.UseVisualStyleBackColor = true;
+            this.startWorking.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.startWorking.UseVisualStyleBackColor = false;
             this.startWorking.Click += new System.EventHandler(this.StartWorking_Click);
             // 
             // resultLabel
@@ -151,11 +157,49 @@
             this.humidChckBox.UseVisualStyleBackColor = true;
             this.humidChckBox.CheckedChanged += new System.EventHandler(this.humidChckBox_CheckedChanged);
             // 
+            // specialChckBox
+            // 
+            this.specialChckBox.AutoSize = true;
+            this.specialChckBox.Location = new System.Drawing.Point(38, 120);
+            this.specialChckBox.Name = "specialChckBox";
+            this.specialChckBox.Size = new System.Drawing.Size(118, 17);
+            this.specialChckBox.TabIndex = 20;
+            this.specialChckBox.Text = "Специален случай";
+            this.specialTip.SetToolTip(this.specialChckBox, "Специален случай е когато в подадения файл,\r\nчетенията са само за влажност\r\nи сто" +
+        "йностите са във втората колона на Excel файла.\r\nВъв всички останали случай,\r\nтаз" +
+        "и опция ще изкара грешни графики!");
+            this.specialChckBox.UseVisualStyleBackColor = true;
+            this.specialChckBox.CheckedChanged += new System.EventHandler(this.specialChckBox_CheckedChanged);
+            // 
+            // specialTip
+            // 
+            this.specialTip.AutomaticDelay = 0;
+            this.specialTip.AutoPopDelay = 0;
+            this.specialTip.InitialDelay = 500;
+            this.specialTip.IsBalloon = true;
+            this.specialTip.OwnerDraw = true;
+            this.specialTip.ReshowDelay = 152;
+            this.specialTip.ShowAlways = true;
+            this.specialTip.ToolTipIcon = System.Windows.Forms.ToolTipIcon.Warning;
+            this.specialTip.ToolTipTitle = "Внимание!";
+            // 
+            // browseFileBtn
+            // 
+            this.browseFileBtn.Location = new System.Drawing.Point(275, 104);
+            this.browseFileBtn.Name = "browseFileBtn";
+            this.browseFileBtn.Size = new System.Drawing.Size(76, 44);
+            this.browseFileBtn.TabIndex = 21;
+            this.browseFileBtn.Text = "Зареди файл";
+            this.browseFileBtn.UseVisualStyleBackColor = true;
+            this.browseFileBtn.Click += new System.EventHandler(this.browseFileBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(383, 231);
+            this.Controls.Add(this.browseFileBtn);
+            this.Controls.Add(this.specialChckBox);
             this.Controls.Add(this.humidChckBox);
             this.Controls.Add(this.tempChckBox);
             this.Controls.Add(this.convertProgBar);
@@ -170,6 +214,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
             this.Text = "Създаване на графики";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -188,6 +233,9 @@
         private System.Windows.Forms.ProgressBar convertProgBar;
         private System.Windows.Forms.CheckBox tempChckBox;
         private System.Windows.Forms.CheckBox humidChckBox;
+        private System.Windows.Forms.CheckBox specialChckBox;
+        private System.Windows.Forms.ToolTip specialTip;
+        private System.Windows.Forms.Button browseFileBtn;
     }
 }
 

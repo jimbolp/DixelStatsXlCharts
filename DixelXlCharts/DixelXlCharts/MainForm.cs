@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Reflection;
+using System.Collections;
 
 namespace DixelXlCharts
 {
@@ -18,10 +20,11 @@ namespace DixelXlCharts
         private bool isProcessRunning = false;
         private delegate void EnableDelegateSave(string text);
         private delegate void EnableDelegateProgBar(int val, bool max);
-
+        public static bool SpecialCase { get; set; }
         public static bool TempCharts { get; set; }
         public static bool HumidCharts { get; set; }
         public static string SaveFilePath { get; set; } = null;
+        public static bool isCancellationRequested { get; set; } = false;
         private string loadedFile = "";
         public MainForm()
         {
@@ -35,6 +38,9 @@ namespace DixelXlCharts
             this.UpdateStyles();
             form = this;
             Icon = Resources.icons._002_analytics_1;
+            specialTip.SetToolTip(this.specialChckBox, "Специален случай е когато в подадения файл, четенията са само за влажност и стойностите са във втората колона на Excel файла."
+                + Environment.NewLine +
+                "Във всички останали случай, тази опция ще изкара грешни графики!");
         }
         public static void ProgressBar(int val, bool max)
         {
@@ -50,8 +56,15 @@ namespace DixelXlCharts
         {
             if (InvokeRequired)
             {
-                Invoke(new EnableDelegateProgBar(CProgBar), new object[] { val, max });
-                return;
+                try
+                {
+                    Invoke(new EnableDelegateProgBar(CProgBar), new object[] { val, max });
+                    return;
+                }
+                catch (Exception)
+                {
+                    return;
+                }
             }
 
             switch (max)
@@ -69,8 +82,10 @@ namespace DixelXlCharts
                         {
                             convertProgBar.Refresh();
                             int percent = (int)(((double)convertProgBar.Value / (double)convertProgBar.Maximum) * 100);
-                            convertProgBar.CreateGraphics().DrawString(percent.ToString() + "% Converting...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(convertProgBar.Width / 2 - 35, convertProgBar.Height / 2 - 7));
-                            
+                            using (Graphics gr = convertProgBar.CreateGraphics())
+                            {
+                                gr.DrawString(percent.ToString() + "% Converting...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(convertProgBar.Width / 2 - 35, convertProgBar.Height / 2 - 7));
+                            }
                         }
                         convertProgBar.Value = val;
                     }
@@ -100,45 +115,16 @@ namespace DixelXlCharts
                         {
                             chartProgBar.Refresh();
                             int percent = (int)(((double)chartProgBar.Value / (double)chartProgBar.Maximum) * 100);
-                            chartProgBar.CreateGraphics().DrawString(percent.ToString() + "% Creating Charts...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(chartProgBar.Width / 2 - 35, chartProgBar.Height / 2 - 7));
-                            //labelCharts.Text = (int)(((double)chartProgBar.Value / (double)chartProgBar.Maximum )* 100) + "% Creating Charts...";
-                        }
-                        else
-                        {
-                            //labelCharts.Text = "Loading...";
+                            using (Graphics gr = chartProgBar.CreateGraphics())
+                            {
+                                gr.DrawString(percent.ToString() + "% Creating Charts...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(chartProgBar.Width / 2 - 35, chartProgBar.Height / 2 - 7));
+                            }
                         }
                         chartProgBar.Value = val;
                     }
                     break;
             }
         }
-        /*public static void WriteIntoLabel(string text, int l)
-        {
-                if (form != null)
-                    form.WriteText(text, l);
-        }
-        private void WriteText(string text, int l)
-        {
-            // If this returns true, it means it was called from an external thread.
-            if (InvokeRequired)
-            {
-                // Create a delegate of this method and let the form run it.
-                this.Invoke(new EnableDelegate(WriteText), new object[] { text, l });
-                return;
-            }
-
-            // Set TextBox or RichTextBox
-            switch (l)
-            {
-                case 1:
-                    resultLabel.Text = text;
-                    break;
-                case 2:
-                    debugTextBox.Text = text;
-                    //debugTextBox.Text += text + Environment.NewLine;
-                    break;
-            }
-        }//*/
         private void FilePathTextBox_DragOver(object sender, DragEventArgs e)
         {
             e.Effect = e.Data.GetDataPresent(DataFormats.FileDrop) ? DragDropEffects.Copy : DragDropEffects.None;
@@ -163,8 +149,7 @@ namespace DixelXlCharts
             }
             if (!graphicsCheckBox.Checked)
             {
-                DialogResult dr =
-                    MessageBox.Show(
+                DialogResult dr = MessageBox.Show(
                         "Не сте избрали опцията за създаване на графики! Сигурни ли сте, че искате да се създадат графики?",
                         "Внимание!", MessageBoxButtons.YesNo);
                 if (dr == DialogResult.No)
@@ -192,22 +177,19 @@ namespace DixelXlCharts
                     {
                         dxData = new DixelData(filePathTextBox.Text, printCheckBox.Checked);
                         dxData.LoadData();
+                        dxData.SaveAndClose();//*/
                     }
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message);
+                        dxData.Dispose();
                         isProcessRunning = false;
                         return;
                     }
-                    dxData.SaveAndClose();
+
                     isProcessRunning = false;
                 });
                 thr1.Start();
-            }
-            catch (COMException)
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
             }
             catch (Exception)
             {
@@ -292,11 +274,75 @@ namespace DixelXlCharts
         private void tempChckBox_CheckedChanged(object sender, EventArgs e)
         {
             TempCharts = tempChckBox.Checked;
+            if(!tempChckBox.Checked && !humidChckBox.Checked)
+            {
+                printCheckBox.Checked = false;
+                printCheckBox.Enabled = false;
+            }
+            if (!tempChckBox.Checked && humidChckBox.Checked)
+            {
+                specialChckBox.Enabled = true;
+            }
+            else if (tempChckBox.Checked)
+            {
+                printCheckBox.Enabled = true;
+                specialChckBox.Checked = false;
+                specialChckBox.Enabled = false;
+            }
         }
 
         private void humidChckBox_CheckedChanged(object sender, EventArgs e)
         {
             HumidCharts = humidChckBox.Checked;
+            if (!humidChckBox.Checked && !tempChckBox.Checked)
+            {
+                printCheckBox.Checked = false;
+                printCheckBox.Enabled = false;
+            }
+            if (humidChckBox.Checked)
+            {
+                printCheckBox.Enabled = true;
+                if (!tempChckBox.Checked)
+                {
+                    specialChckBox.Enabled = true;
+                }
+                else
+                {
+                    specialChckBox.Checked = false;
+                    specialChckBox.Enabled = false;
+                }
+            }
+            else
+            {
+                specialChckBox.Checked = false;
+                specialChckBox.Enabled = false;
+            }
+        }
+
+        private void specialChckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            SpecialCase = specialChckBox.Checked;
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            isCancellationRequested = true;
+            if (Marshal.AreComObjectsAvailableForCleanup())
+            {
+                Marshal.CleanupUnusedObjectsInCurrentContext();
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+
+        private void browseFileBtn_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Multiselect = false;            
+            if(DialogResult.OK == ofd.ShowDialog())
+            {
+                filePathTextBox.Text = ofd.FileName;
+            }
         }
     }
 }

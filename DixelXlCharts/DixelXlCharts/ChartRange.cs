@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
 
 namespace DixelXlCharts
@@ -24,13 +20,24 @@ namespace DixelXlCharts
         readonly int type = 0;
         public int ChartNumber { get; set; } = 1;
         public int RowOfRange { get; set; } = 0;
-        public ChartRange(char type, Range usedRange, bool print)
+        public ChartRange(char type, Range usedRange, bool print, bool special)
         {
             if(!(type.ToString().ToLower() == "t" || type.ToString().ToLower() == "h"))
             {
                 throw new ArgumentException("The given graph type is not supported! The supported graph types are 'T' for Temperatures or 'H' for Humidity.");
             }
-            col = type.ToString().ToLower() == "t" ? 'B' : 'C';
+            switch (type.ToString().ToLower())
+            {
+                case "t":
+                    col = 'B';
+                    break;
+                case "h":
+                    {
+                        col = special ? 'B' : 'C';
+                    }
+                    break;
+            }
+            //col = type.ToString().ToLower() == "t" ? 'B' : 'C';
             this.type = type.ToString().ToLower() == "t" ? 1 : 2;
             topDateCell = "A" + 1;
             topDataCell = col.ToString() + 1;
@@ -41,51 +48,6 @@ namespace DixelXlCharts
             DateRange = usedRange.Range[topDateCell, bottomDateCell];
             DataRange = usedRange.Range[topDataCell, bottomDataCell];
         }
-        /*
-        public object TopDate {
-            get
-            {
-                return topDateCell;
-            }
-            set
-            {
-                topDateCell = "A" + value.ToString();
-            }
-        }
-        public object TopData
-        {
-            get
-            {
-                return topDataCell;
-            }
-            set
-            {
-                topDataCell = col + value.ToString();
-            }
-        }
-        public object BottomDate
-        {
-            get
-            {
-                return bottomDateCell;
-            }
-            set
-            {
-                bottomDateCell = "A" + value.ToString();
-            }
-        }
-        public object BottomData
-        {
-            get
-            {
-                return bottomDataCell;
-            }
-            set
-            {
-                bottomDataCell = col + value.ToString();
-            }
-        }
-        //*/
         public void ExpandRange(int row)
         {
             RowOfRange++;
@@ -103,6 +65,7 @@ namespace DixelXlCharts
         public void CreateChart(ChartObjects xlChartObjs, string Name, double startChartPositionLeft, double startChartPositionTop)
         {
             ChartNumber++;
+            if (type == 2) { startChartPositionLeft += 100; } else { startChartPositionTop += 50; } 
             Name = type != 0 ? (type == 1 ? Name + "_T" : Name + "_H") : Name;
             DateRange = usedRange.Range[topDateCell, bottomDateCell];
             DataRange = usedRange.Range[topDataCell, bottomDataCell];
