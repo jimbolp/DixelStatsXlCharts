@@ -20,6 +20,7 @@ namespace DixelXlCharts
         private bool isProcessRunning = false;
         private delegate void EnableDelegateSave(string text);
         private delegate void EnableDelegateProgBar(int val, bool max);
+        private delegate void EnableDelegateConvProgBar(int val, bool max, int number, int count);
         public static bool SpecialCase { get; set; }
         public static bool TempCharts { get; set; }
         public static bool HumidCharts { get; set; }
@@ -47,18 +48,18 @@ namespace DixelXlCharts
             form?.ProgBar(val, max);
         }
 
-        public static void ConvProgBar(int val, bool max)
+        public static void ConvProgBar(int val, bool max, int number, int count)
         {
-            form?.CProgBar(val, max);
+            form?.CProgBar(val, max, number, count);
         }
 
-        private void CProgBar(int val, bool max)
+        private void CProgBar(int val, bool max, int number, int count)
         {
             if (InvokeRequired)
             {
                 try
                 {
-                    Invoke(new EnableDelegateProgBar(CProgBar), new object[] { val, max });
+                    Invoke(new EnableDelegateConvProgBar(CProgBar), new object[] { val, max, number, count });
                     return;
                 }
                 catch (Exception)
@@ -66,30 +67,32 @@ namespace DixelXlCharts
                     return;
                 }
             }
-
-            switch (max)
+           lock(convertProgBar)
             {
-                case true:
-                    if (convertProgBar.Maximum < val || val == 0)
-                    {
-                        convertProgBar.Maximum = val;
-                    }
-                    break;
-                case false:
-                    if (convertProgBar.Value < val && val < convertProgBar.Maximum)
-                    {
-                        if (convertProgBar.Maximum != 0)
+                switch (max)
+                {
+                    case true:
+                        if (convertProgBar.Maximum < val || val == 1 || val == 0)
                         {
-                            convertProgBar.Refresh();
-                            int percent = (int)(((double)convertProgBar.Value / (double)convertProgBar.Maximum) * 100);
-                            using (Graphics gr = convertProgBar.CreateGraphics())
-                            {
-                                gr.DrawString(percent.ToString() + "% Converting...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(convertProgBar.Width / 2 - 35, convertProgBar.Height / 2 - 7));
-                            }
+                            convertProgBar.Maximum = val;
                         }
-                        convertProgBar.Value = val;
-                    }
-                    break;
+                        break;
+                    case false:
+                        if (convertProgBar.Value < val && val < convertProgBar.Maximum)
+                        {
+                            if (convertProgBar.Maximum != 0)
+                            {
+                                convertProgBar.Refresh();
+                                int percent = (int)(((double)convertProgBar.Value / (double)convertProgBar.Maximum) * 100);
+                                using (Graphics gr = convertProgBar.CreateGraphics())
+                                {
+                                    gr.DrawString(percent.ToString() + "% Converting... Page "+number + "/" + count, new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(convertProgBar.Width / 2 - 60, convertProgBar.Height / 2 - 7));
+                                }
+                            }
+                            convertProgBar.Value = val;
+                        }
+                        break;
+                }
             }
         }
         private void ProgBar(int val, bool max)
@@ -99,30 +102,32 @@ namespace DixelXlCharts
                 Invoke(new EnableDelegateProgBar(ProgBar), new object[] { val, max });
                 return;
             }
-            
-            switch (max)
+            lock (chartProgBar)
             {
-                case true:
-                    if(chartProgBar.Maximum < val || val == 0)
-                    {
-                        chartProgBar.Maximum = val;
-                    }
-                    break;
-                case false:
-                    if (chartProgBar.Value < val && val < chartProgBar.Maximum)
-                    {
-                        if (chartProgBar.Maximum != 0)
+                switch (max)
+                {
+                    case true:
+                        if (chartProgBar.Maximum < val || val == 0)
                         {
-                            chartProgBar.Refresh();
-                            int percent = (int)(((double)chartProgBar.Value / (double)chartProgBar.Maximum) * 100);
-                            using (Graphics gr = chartProgBar.CreateGraphics())
-                            {
-                                gr.DrawString(percent.ToString() + "% Creating Charts...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(chartProgBar.Width / 2 - 35, chartProgBar.Height / 2 - 7));
-                            }
+                            chartProgBar.Maximum = val;
                         }
-                        chartProgBar.Value = val;
-                    }
-                    break;
+                        break;
+                    case false:
+                        if (chartProgBar.Value < val && val < chartProgBar.Maximum)
+                        {
+                            if (chartProgBar.Maximum != 0)
+                            {
+                                chartProgBar.Refresh();
+                                int percent = (int)(((double)chartProgBar.Value / (double)chartProgBar.Maximum) * 100);
+                                using (Graphics gr = chartProgBar.CreateGraphics())
+                                {
+                                    gr.DrawString(percent.ToString() + "% Creating Charts...", new Font("Arial", (float)9.00, FontStyle.Regular), Brushes.Black, new PointF(chartProgBar.Width / 2 - 35, chartProgBar.Height / 2 - 7));
+                                }
+                            }
+                            chartProgBar.Value = val;
+                        }
+                        break;
+                }
             }
         }
         private void FilePathTextBox_DragOver(object sender, DragEventArgs e)
@@ -142,6 +147,10 @@ namespace DixelXlCharts
 
         private void StartWorking_Click(object sender, EventArgs e)
         {
+            convertProgBar.Value = 0;
+            chartProgBar.Value = 0;
+            convertProgBar.Maximum = 1;
+            chartProgBar.Maximum = 1;
             if (isProcessRunning)
             {
                 MessageBox.Show("The process is already running!!");
@@ -172,7 +181,7 @@ namespace DixelXlCharts
                 Thread thr1 = new Thread(() =>
                 {
                     isProcessRunning = true;
-                    Thread.CurrentThread.IsBackground = false;
+                    //Thread.CurrentThread.IsBackground = false;
                     try
                     {
                         dxData = new DixelData(filePathTextBox.Text, printCheckBox.Checked);

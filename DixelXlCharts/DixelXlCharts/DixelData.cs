@@ -94,7 +94,10 @@ namespace DixelXlCharts
                     throw;
                 }
 
-                MainForm.ConvProgBar(1, true);
+                
+                int sheetCount = xlWSheets.Count;
+                int sheetNumber = 1;
+                
                 foreach (Worksheet xlWSheet in xlWSheets)
                 {
                     if (MainForm.isCancellationRequested)
@@ -102,20 +105,22 @@ namespace DixelXlCharts
                         Dispose();
                         return;
                     }
+                    MainForm.ConvProgBar(1, true, sheetNumber, sheetCount);
+                    ConvertDateCellsToText(xlWSheet.UsedRange, sheetNumber, sheetCount);
                     Thread trCharts = new Thread(() =>
                     {
-                        ConvertDateCellsToText(xlWSheet.UsedRange);
                         if(MainForm.TempCharts)
                             TempChartRanges(xlWSheet);
                         if(MainForm.HumidCharts)
                             HumidChartRanges(xlWSheet);
 
                     });
-                    trCharts.Start();
                     treadsCharts.Add(trCharts);
+                    sheetNumber++;
                 }
                 foreach (Thread t in treadsCharts)
                 {
+                    t.Start();
                     t.Join();
                 }
             });
@@ -173,7 +178,10 @@ namespace DixelXlCharts
                     return;
                 }
                 MainForm.ProgressBar(i, false);
-                
+                if (xlRangeArr[i, 1] == null)
+                {
+                    continue;
+                }
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
                 currDateCell = Convert.ToString(xlRangeArr[i, 1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if (currDateCell.Contains("\'"))
@@ -289,7 +297,11 @@ namespace DixelXlCharts
                     Dispose();
                     return;
                 }
-                MainForm.ProgressBar(i, false);    
+                MainForm.ProgressBar(i, false);
+                if(xlRangeArr[i, 1] == null)
+                {
+                    continue;
+                }    
                 currDateCell = Convert.ToString(xlRangeArr[i,1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
                 if(currDateCell.Contains("\'"))
                     currDateCell = currDateCell.Remove(currDateCell.IndexOf('\''),1);
@@ -349,9 +361,11 @@ namespace DixelXlCharts
                 }
             }
         }
-        private void ConvertDateCellsToText(Range usedRange)
+        private void ConvertDateCellsToText(Range usedRange, int sheetNumber, int sheetCount)
         {
-            MainForm.ConvProgBar(usedRange.Rows.Count, true);
+            MainForm.ConvProgBar(1, true, sheetNumber, sheetCount);
+            MainForm.ConvProgBar(usedRange.Rows.Count, true, sheetNumber, sheetCount);
+            MainForm.ConvProgBar(0, false, sheetNumber, sheetCount);
 
             object[,] xlNewRange = usedRange.Value;
             for (int i = 1; i <= usedRange.Rows.Count; ++i)
@@ -361,10 +375,10 @@ namespace DixelXlCharts
                     Dispose();
                     return;
                 }
-                MainForm.ConvProgBar(i, false);
+                MainForm.ConvProgBar(i, false, sheetNumber, sheetCount);
                 
                     DateTime d;
-                    if (DateTime.TryParse(xlNewRange[i, 1].ToString(), out d))
+                    if (DateTime.TryParse(Convert.ToString(xlNewRange[i, 1]), out d))
                         xlNewRange[i, 1] = "\'" + xlNewRange[i, 1];
             }
             usedRange.Value = xlNewRange;
