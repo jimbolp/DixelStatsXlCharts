@@ -25,6 +25,7 @@ namespace DixelXlCharts
         {
             try
             {
+                xlApp.DisplayAlerts = false;
                 SetSaveDirectory(filePath);
                 printNeeded = print;
                 xlWBooks = xlApp.Workbooks;
@@ -33,6 +34,8 @@ namespace DixelXlCharts
             catch (ArgumentException)
             {
                 MessageBox.Show("Invalid file path!");
+                xlApp.Quit();
+                Dispose();
                 return;
             }
             catch (NullReferenceException)
@@ -44,6 +47,8 @@ namespace DixelXlCharts
             }
             catch (COMException)
             {
+                xlApp.Quit();
+                Dispose();
                 throw new Exception("Invalid File Path.. Object was not created..");
             }
         }
@@ -66,7 +71,7 @@ namespace DixelXlCharts
         {
             try
             {
-                xlWBook = xlWBooks.Open(filePath, IgnoreReadOnlyRecommended: true, ReadOnly: false, Editable: true);
+                xlWBook = xlWBooks.Open(filePath, IgnoreReadOnlyRecommended: true, ReadOnly: true, Editable: false);
             }
             catch(COMException)
             {
@@ -430,7 +435,17 @@ namespace DixelXlCharts
                     try
                     {
                         xlApp.Visible = true;
-                        xlWBook.SaveAs(MainForm.SaveFilePath);
+                        xlWBook.SaveAs(MainForm.SaveFilePath, XlFileFormat.xlWorkbookNormal,
+                                          Type.Missing,
+                                          Type.Missing,
+                                          false,
+                                          false,
+                                          XlSaveAsAccessMode.xlExclusive,
+                                          false,
+                                          false,
+                                          Type.Missing,
+                                          Type.Missing,
+                                          Type.Missing);//*/
                         MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
@@ -485,19 +500,19 @@ namespace DixelXlCharts
         private void ReleaseObject(object obj)
         {
             try
-            {
+            {                
                 Marshal.FinalReleaseComObject(obj);
                 obj = null;
             }
             catch (COMException cEx)
             {
                 obj = null;
-                MessageBox.Show("Com Exception Occured while releasing object " + cEx.ToString());
+                //MessageBox.Show("Com Exception Occured while releasing object " + cEx.ToString());
             }
             catch (Exception ex)
             {
                 obj = null;
-                MessageBox.Show("Exception Occured while releasing object " + ex.ToString());
+                //MessageBox.Show("Exception Occured while releasing object " + ex.ToString());
             }
             finally
             {

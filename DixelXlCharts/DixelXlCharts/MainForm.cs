@@ -78,7 +78,7 @@ namespace DixelXlCharts
                         }
                         break;
                     case false:
-                        if (convertProgBar.Value < val && val < convertProgBar.Maximum)
+                        if (convertProgBar.Value < val && val <= convertProgBar.Maximum)
                         {
                             if (convertProgBar.Maximum != 0)
                             {
@@ -91,6 +91,7 @@ namespace DixelXlCharts
                             }
                             convertProgBar.Value = val;
                         }
+                        
                         break;
                 }
             }
@@ -113,7 +114,7 @@ namespace DixelXlCharts
                         }
                         break;
                     case false:
-                        if (chartProgBar.Value < val && val < chartProgBar.Maximum)
+                        if (chartProgBar.Value < val && val <= chartProgBar.Maximum)
                         {
                             if (chartProgBar.Maximum != 0)
                             {
@@ -191,8 +192,10 @@ namespace DixelXlCharts
                     catch (Exception ex)
                     {
                         MessageBox.Show(ex.Message);
-                        dxData.Dispose();
+                        if(dxData != null)
+                            dxData.Dispose();
                         isProcessRunning = false;
+                        
                         return;
                     }
 
