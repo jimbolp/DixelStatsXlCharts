@@ -234,7 +234,7 @@ namespace DixelXlCharts
                     Filter = "Excel 97-2003 Workbook|*.xls",
                     Title = "Save As",
                     DefaultExt = ".xls",
-                    InitialDirectory = saveFileDir
+                    InitialDirectory = saveFileDir ?? Directory.GetCurrentDirectory()
                 };
             }
             else
@@ -244,7 +244,7 @@ namespace DixelXlCharts
                     Filter = "Excel Workbook|*.xlsx; *.xlsm",
                     Title = "Save As",
                     DefaultExt = ".xlsx",
-                    InitialDirectory = saveFileDir
+                    InitialDirectory = saveFileDir ?? Directory.GetCurrentDirectory()
                 };
             }
             saveFileDialog.AddExtension = true;

@@ -93,13 +93,13 @@ namespace DixelXlCharts
                 {
                     throw;
                 }
-
-                
                 int sheetCount = xlWSheets.Count;
                 int sheetNumber = 1;
                 
                 foreach (Worksheet xlWSheet in xlWSheets)
                 {
+                    if (xlWSheet.UsedRange.Value == null)
+                        continue;
                     if (MainForm.isCancellationRequested)
                     {
                         Dispose();
@@ -429,6 +429,7 @@ namespace DixelXlCharts
                 {
                     try
                     {
+                        xlApp.Visible = true;
                         xlWBook.SaveAs(MainForm.SaveFilePath);
                         MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
