@@ -26,6 +26,10 @@ namespace DixelXlCharts
             try
             {
                 xlApp.DisplayAlerts = false;
+                xlApp.ScreenUpdating = false;
+                xlApp.Visible = false;
+                xlApp.UserControl = false;
+                xlApp.Interactive = false;
                 SetSaveDirectory(filePath);
                 printNeeded = print;
                 xlWBooks = xlApp.Workbooks;
@@ -418,6 +422,7 @@ namespace DixelXlCharts
         }
         public void SaveAndClose()
         {
+            xlApp.Visible = true;
             try
             {
                 MainForm.SaveDialogBox(saveFileDir);
@@ -434,8 +439,8 @@ namespace DixelXlCharts
                 {
                     try
                     {
-                        xlApp.Visible = true;
-                        xlWBook.SaveAs(MainForm.SaveFilePath, XlFileFormat.xlWorkbookNormal,
+                        
+                        xlWBook.SaveAs(MainForm.SaveFilePath,Type.Missing,
                                           Type.Missing,
                                           Type.Missing,
                                           false,
@@ -446,7 +451,9 @@ namespace DixelXlCharts
                                           Type.Missing,
                                           Type.Missing,
                                           Type.Missing);//*/
-                        MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
+                        xlApp.Visible = false;
+                        if(xlWBook.Saved)
+                            MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
                         //xlApp.Quit();
