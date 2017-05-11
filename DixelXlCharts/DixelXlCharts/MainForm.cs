@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using System.Reflection;
-using System.Collections;
 
 namespace DixelXlCharts
 {
@@ -91,7 +85,8 @@ namespace DixelXlCharts
                             }
                             convertProgBar.Value = val;
                         }
-                        
+                        if(val == 0)
+                            convertProgBar.Value = val;
                         break;
                 }
             }
@@ -127,6 +122,8 @@ namespace DixelXlCharts
                             }
                             chartProgBar.Value = val;
                         }
+                        if(val == 0)
+                            chartProgBar.Value = val;
                         break;
                 }
             }
@@ -198,7 +195,6 @@ namespace DixelXlCharts
                         
                         return;
                     }
-
                     isProcessRunning = false;
                 });
                 thr1.Start();

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Microsoft.Office.Interop.Excel;
@@ -422,7 +420,9 @@ namespace DixelXlCharts
         }
         public void SaveAndClose()
         {
-            xlApp.Visible = true;
+            MainForm.ProgressBar(0, false);
+            MainForm.ConvProgBar(0, false, 1, 1);
+            //xlApp.Visible = true;
             try
             {
                 MainForm.SaveDialogBox(saveFileDir);
@@ -440,7 +440,8 @@ namespace DixelXlCharts
                     try
                     {
                         
-                        xlWBook.SaveAs(MainForm.SaveFilePath,Type.Missing,
+                        xlWBook.SaveAs(MainForm.SaveFilePath,
+                                          Type.Missing,
                                           Type.Missing,
                                           Type.Missing,
                                           false,
@@ -451,9 +452,10 @@ namespace DixelXlCharts
                                           Type.Missing,
                                           Type.Missing,
                                           Type.Missing);//*/
-                        xlApp.Visible = false;
-                        if(xlWBook.Saved)
-                            MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
+                        //xlApp.Visible = false;
+                        while (!xlWBook.Saved) { }
+
+                        MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
                         //xlApp.Quit();
