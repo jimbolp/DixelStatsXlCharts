@@ -12,6 +12,7 @@ namespace DixelXlCharts
     {
         private static MainForm form = null;
         private bool isProcessRunning = false;
+        
         private delegate void EnableDelegateSave(string text);
         private delegate void EnableDelegateProgBar(int val, bool max);
         private delegate void EnableDelegateConvProgBar(int val, bool max, int number, int count);
@@ -37,6 +38,8 @@ namespace DixelXlCharts
                 + Environment.NewLine +
                 "Във всички останали случай, тази опция ще изкара грешни графики!");
         }
+        
+
         public static void ProgressBar(int val, bool max)
         {
             form?.ProgBar(val, max);
@@ -334,11 +337,13 @@ namespace DixelXlCharts
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            isCancellationRequested = true;
+            //isCancellationRequested = true;
             if (Marshal.AreComObjectsAvailableForCleanup())
             {
                 Marshal.CleanupUnusedObjectsInCurrentContext();
             }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
             GC.Collect();
             GC.WaitForPendingFinalizers();
         }

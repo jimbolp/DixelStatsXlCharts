@@ -493,38 +493,37 @@ namespace DixelXlCharts
             }
             catch (InvalidComObjectException)
             {
-                MainForm.isCancellationRequested = false;
                 //File probably already closed :D :D
             }
             catch (Exception)
             {
-                MainForm.isCancellationRequested = false;
-                MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
+                //MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
             }
             ReleaseObject(xlWBook);
             ReleaseObject(xlWBooks);
             ReleaseObject(xlApp);
-            MainForm.isCancellationRequested = false;
         }
         private void ReleaseObject(object obj)
         {
             try
-            {                
-                Marshal.FinalReleaseComObject(obj);
+            {
+                while (Marshal.ReleaseComObject(obj) > 0) { }
                 obj = null;
             }
-            catch (COMException cEx)
+            catch (COMException)
             {
                 obj = null;
                 //MessageBox.Show("Com Exception Occured while releasing object " + cEx.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 obj = null;
                 //MessageBox.Show("Exception Occured while releasing object " + ex.ToString());
             }
             finally
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
