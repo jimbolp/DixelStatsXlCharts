@@ -78,8 +78,8 @@ namespace DixelXlCharts
             xlChartPage.ChartTitle.Text = Name;
             xlChartPage.Legend.Delete();
             
-            if (printNeeded)
-                xlChartPage.PrintOut();
+            /*if (printNeeded)
+                xlChartPage.PrintOut();//*/
 
             DateRange = null;
             DataRange = null;

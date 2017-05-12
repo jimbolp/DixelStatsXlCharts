@@ -12,7 +12,13 @@ namespace DixelXlCharts
     {
         private static MainForm form = null;
         private bool isProcessRunning = false;
-        
+        private static bool isPrintCanceled = false;
+        public static bool PrintCanceled {
+            get {
+                return isPrintCanceled;
+            } }
+        private delegate void EnableDelegateLabel(string test);
+        private delegate void EnableDelegatePrint(bool canceled);
         private delegate void EnableDelegateSave(string text);
         private delegate void EnableDelegateProgBar(int val, bool max);
         private delegate void EnableDelegateConvProgBar(int val, bool max, int number, int count);
@@ -38,7 +44,35 @@ namespace DixelXlCharts
                 + Environment.NewLine +
                 "Във всички останали случай, тази опция ще изкара грешни графики!");
         }
-        
+        public static void LabelText(string text)
+        {
+            form?.LText(text);
+        }
+
+        private void LText(string text)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new EnableDelegateLabel(LText), new object[] { text });
+                return;
+            }
+            resultLabel.Text = text;
+        }
+
+        public static void HideStopBtn(bool stopBtn)
+        {
+            form?.HidePBtn(stopBtn);
+        }
+
+        private void HidePBtn(bool stopBtn)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new EnableDelegatePrint(HidePBtn), new object[] { stopBtn });
+                return;
+            }
+            stopPrintBtn.Enabled = stopBtn;
+        }
 
         public static void ProgressBar(int val, bool max)
         {
@@ -157,25 +191,21 @@ namespace DixelXlCharts
                 MessageBox.Show("The process is already running!!");
                 return;
             }
-            if (!graphicsCheckBox.Checked)
+            if (!graphicsCheckBox.Checked && !printCheckBox.Checked)
             {
                 DialogResult dr = MessageBox.Show(
-                        "Не сте избрали опцията за създаване на графики! Сигурни ли сте, че искате да се създадат графики?",
-                        "Внимание!", MessageBoxButtons.YesNo);
-                if (dr == DialogResult.No)
-                {
-                    return;
-                }
-                graphicsCheckBox.Checked = true;
+                        "Не сте избрали опция за създаване или принтиране на графики!",
+                        "Внимание!", MessageBoxButtons.OK);
+                return;
             }
-            else
+            /*else
             {
                 if (!tempChckBox.Checked && !humidChckBox.Checked)
                 {
                     MessageBox.Show("Изберете \"Температура\", \"Влажност\" или и двете!");
                     return;
                 }
-            }
+            }//*/
             DixelData dxData = null;
             try
             {
@@ -186,7 +216,16 @@ namespace DixelXlCharts
                     try
                     {
                         dxData = new DixelData(filePathTextBox.Text, printCheckBox.Checked);
-                        dxData.LoadData();
+                        if(graphicsCheckBox.Checked)
+                            dxData.LoadData();
+                        if (printCheckBox.Checked)
+                        {
+                            HideStopBtn(true);
+                            isPrintCanceled = false;
+                            dxData.CheckChartsTest();
+                            HideStopBtn(false);
+                            isPrintCanceled = false;
+                        }
                         dxData.SaveAndClose();//*/
                     }
                     catch (Exception ex)
@@ -265,7 +304,7 @@ namespace DixelXlCharts
         {
             if (graphicsCheckBox.Checked)
             {
-                printCheckBox.Enabled = true;
+                //printCheckBox.Enabled = true;
                 tempChckBox.Enabled = true;
                 tempChckBox.Checked = true;
                 humidChckBox.Enabled = true;
@@ -273,8 +312,8 @@ namespace DixelXlCharts
             }
             else
             {
-                printCheckBox.Checked = false;
-                printCheckBox.Enabled = false;
+                //printCheckBox.Checked = false;
+                //printCheckBox.Enabled = false;
                 tempChckBox.Checked = false;
                 humidChckBox.Checked = false;
                 tempChckBox.Enabled = false;
@@ -285,18 +324,18 @@ namespace DixelXlCharts
         private void tempChckBox_CheckedChanged(object sender, EventArgs e)
         {
             TempCharts = tempChckBox.Checked;
-            if(!tempChckBox.Checked && !humidChckBox.Checked)
+            /*if(!tempChckBox.Checked && !humidChckBox.Checked)
             {
                 printCheckBox.Checked = false;
                 printCheckBox.Enabled = false;
-            }
+            }//*/
             if (!tempChckBox.Checked && humidChckBox.Checked)
             {
                 specialChckBox.Enabled = true;
             }
             else if (tempChckBox.Checked)
             {
-                printCheckBox.Enabled = true;
+                //printCheckBox.Enabled = true;
                 specialChckBox.Checked = false;
                 specialChckBox.Enabled = false;
             }
@@ -305,14 +344,14 @@ namespace DixelXlCharts
         private void humidChckBox_CheckedChanged(object sender, EventArgs e)
         {
             HumidCharts = humidChckBox.Checked;
-            if (!humidChckBox.Checked && !tempChckBox.Checked)
+            /*if (!humidChckBox.Checked && !tempChckBox.Checked)
             {
                 printCheckBox.Checked = false;
                 printCheckBox.Enabled = false;
-            }
+            }//*/
             if (humidChckBox.Checked)
             {
-                printCheckBox.Enabled = true;
+                //printCheckBox.Enabled = true;
                 if (!tempChckBox.Checked)
                 {
                     specialChckBox.Enabled = true;
@@ -356,6 +395,11 @@ namespace DixelXlCharts
             {
                 filePathTextBox.Text = ofd.FileName;
             }
+        }
+
+        private void stopPrintBtn_Click(object sender, EventArgs e)
+        {
+            isPrintCanceled = true;
         }
     }
 }

@@ -45,6 +45,7 @@
             this.specialTip = new System.Windows.Forms.ToolTip(this.components);
             this.browseFileBtn = new System.Windows.Forms.Button();
             this.savingLabel = new System.Windows.Forms.Label();
+            this.stopPrintBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -71,7 +72,6 @@
             // printCheckBox
             // 
             this.printCheckBox.AutoSize = true;
-            this.printCheckBox.Enabled = false;
             this.printCheckBox.Location = new System.Drawing.Point(12, 143);
             this.printCheckBox.Name = "printCheckBox";
             this.printCheckBox.Size = new System.Drawing.Size(138, 17);
@@ -95,10 +95,9 @@
             // resultLabel
             // 
             this.resultLabel.AutoEllipsis = true;
-            this.resultLabel.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.resultLabel.Location = new System.Drawing.Point(0, 355);
+            this.resultLabel.Location = new System.Drawing.Point(3, 185);
             this.resultLabel.Name = "resultLabel";
-            this.resultLabel.Size = new System.Drawing.Size(326, 132);
+            this.resultLabel.Size = new System.Drawing.Size(147, 14);
             this.resultLabel.TabIndex = 10;
             // 
             // sheetNameLabel
@@ -120,7 +119,7 @@
             // chartProgBar
             // 
             this.chartProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.chartProgBar.Location = new System.Drawing.Point(0, 208);
+            this.chartProgBar.Location = new System.Drawing.Point(0, 225);
             this.chartProgBar.Name = "chartProgBar";
             this.chartProgBar.Size = new System.Drawing.Size(383, 23);
             this.chartProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -129,7 +128,7 @@
             // convertProgBar
             // 
             this.convertProgBar.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.convertProgBar.Location = new System.Drawing.Point(0, 185);
+            this.convertProgBar.Location = new System.Drawing.Point(0, 202);
             this.convertProgBar.Name = "convertProgBar";
             this.convertProgBar.Size = new System.Drawing.Size(383, 23);
             this.convertProgBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -204,11 +203,22 @@
             this.savingLabel.TabIndex = 22;
             this.savingLabel.Visible = false;
             // 
+            // stopPrintBtn
+            // 
+            this.stopPrintBtn.Location = new System.Drawing.Point(276, 154);
+            this.stopPrintBtn.Name = "stopPrintBtn";
+            this.stopPrintBtn.Size = new System.Drawing.Size(75, 28);
+            this.stopPrintBtn.TabIndex = 23;
+            this.stopPrintBtn.Text = "Stop print";
+            this.stopPrintBtn.UseVisualStyleBackColor = true;
+            this.stopPrintBtn.Click += new System.EventHandler(this.stopPrintBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(383, 231);
+            this.ClientSize = new System.Drawing.Size(383, 248);
+            this.Controls.Add(this.stopPrintBtn);
             this.Controls.Add(this.savingLabel);
             this.Controls.Add(this.browseFileBtn);
             this.Controls.Add(this.specialChckBox);
@@ -249,6 +259,7 @@
         private System.Windows.Forms.ToolTip specialTip;
         private System.Windows.Forms.Button browseFileBtn;
         private System.Windows.Forms.Label savingLabel;
+        private System.Windows.Forms.Button stopPrintBtn;
     }
 }
 
