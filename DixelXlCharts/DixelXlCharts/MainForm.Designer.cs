@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.filePathTextBox = new System.Windows.Forms.TextBox();
             this.graphicsCheckBox = new System.Windows.Forms.CheckBox();
@@ -41,8 +42,9 @@
             this.tempChckBox = new System.Windows.Forms.CheckBox();
             this.humidChckBox = new System.Windows.Forms.CheckBox();
             this.specialChckBox = new System.Windows.Forms.CheckBox();
-            this.specialTip = new System.Windows.Forms.ToolTip();
+            this.specialTip = new System.Windows.Forms.ToolTip(this.components);
             this.browseFileBtn = new System.Windows.Forms.Button();
+            this.printExistingBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -193,11 +195,22 @@
             this.browseFileBtn.UseVisualStyleBackColor = true;
             this.browseFileBtn.Click += new System.EventHandler(this.browseFileBtn_Click);
             // 
+            // printExistingBtn
+            // 
+            this.printExistingBtn.Location = new System.Drawing.Point(275, 154);
+            this.printExistingBtn.Name = "printExistingBtn";
+            this.printExistingBtn.Size = new System.Drawing.Size(75, 23);
+            this.printExistingBtn.TabIndex = 22;
+            this.printExistingBtn.Text = "button1";
+            this.printExistingBtn.UseVisualStyleBackColor = true;
+            this.printExistingBtn.Visible = false;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(383, 231);
+            this.Controls.Add(this.printExistingBtn);
             this.Controls.Add(this.browseFileBtn);
             this.Controls.Add(this.specialChckBox);
             this.Controls.Add(this.humidChckBox);
@@ -236,6 +249,7 @@
         private System.Windows.Forms.CheckBox specialChckBox;
         private System.Windows.Forms.ToolTip specialTip;
         private System.Windows.Forms.Button browseFileBtn;
+        private System.Windows.Forms.Button printExistingBtn;
     }
 }
 

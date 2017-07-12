@@ -433,7 +433,7 @@ namespace DixelXlCharts
                         MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
-                        //xlApp.Quit();
+                        xlApp.Quit();
                         Dispose();
                     }
                     catch (COMException)
@@ -468,25 +468,22 @@ namespace DixelXlCharts
             }
             catch (InvalidComObjectException)
             {
-                MainForm.isCancellationRequested = false;
                 //File probably already closed :D :D
             }
             catch (Exception)
             {
-                MainForm.isCancellationRequested = false;
                 MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
             }
             ReleaseObject(xlWBook);
             ReleaseObject(xlWBooks);
             ReleaseObject(xlApp);
-            MainForm.isCancellationRequested = false;
         }
         private void ReleaseObject(object obj)
         {
             try
             {
-                Marshal.FinalReleaseComObject(obj);
-                obj = null;
+                while (Marshal.ReleaseComObject(obj) > 0) { }
+                    obj = null;                
             }
             catch (COMException cEx)
             {
@@ -500,6 +497,8 @@ namespace DixelXlCharts
             }
             finally
             {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             }
