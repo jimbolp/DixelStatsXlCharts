@@ -10,6 +10,8 @@ using Microsoft.Office.Core;
 using System.Globalization;
 using System.Threading;
 using System.Printing;
+using System.Drawing.Printing;
+using System.Drawing;
 
 namespace DixelXlCharts
 {    
@@ -85,9 +87,6 @@ namespace DixelXlCharts
         }
         public void CheckChartsTest()
         {
-            
-            PrintQueue pq = LocalPrintServer.GetDefaultPrintQueue();//GetPrintJobInfoCollection();
-            
             Sheets xlWSheets;
             try
             {
@@ -97,165 +96,56 @@ namespace DixelXlCharts
             {
                 throw;
             }
-            if(xlWSheets != null)
+            MainForm.LabelText("Printing....");
+            if (xlWSheets != null)
             {
                 ChartObjects chObjs;
                 int iterations = 0;
+                
                 foreach(Worksheet ws in xlWSheets)
                 {
                     chObjs = ws.ChartObjects();
                     if (chObjs == null)
                     {
-                        return;s
+                        continue;
                     }
+                    
                     foreach(ChartObject chObj in chObjs)
                     {
-                        var tempFileToPrint = Path.GetTempPath() + Path.GetTempFileName() + ".xps";
-                        
-                        pq.Refresh();
-                        switch (pq.QueueStatus)
-                        {
-                            case PrintQueueStatus.Busy:
-                                MainForm.LabelText("Printer Busy...");
-                                while (pq.IsBusy)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.DoorOpen:
-                                MainForm.LabelText("Printer Door Opened!");
-                                while (pq.IsDoorOpened)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.Error:
-                                MainForm.LabelText("Printer Error");
-                                while (pq.IsInError)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.NotAvailable:
-                                MainForm.LabelText("Printer Not Available");
-                                while (pq.IsNotAvailable)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.Offline:
-                                MainForm.LabelText("Printer is Offline");
-                                while (pq.IsOffline)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.OutOfMemory:
-                                MainForm.LabelText("Printer Out of Memory");
-                                while (pq.IsOutOfMemory)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            case PrintQueueStatus.Processing:
-                                MainForm.LabelText("Processing...");
-                                while (pq.IsProcessing)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-                            default:
-                                MainForm.LabelText("Printing...");
-                                while (pq.IsPrinting)
-                                {
-                                    if (MainForm.PrintCanceled)
-                                    {
-                                        return;
-                                    }
-                                    else
-                                        pq.Refresh();
-                                }
-                                break;
-
-                        }
                         iterations++;
                         Chart ch = chObj.Chart;
-                        ch.PageSetup.Orientation = XlPageOrientation.xlLandscape;
-                        ch.PageSetup.PaperSize = XlPaperSize.xlPaperA4;
-                        if (iterations >= 1)
+                        
+                        if (iterations >= 3)
                         {
                             iterations = 0;
-                            pq.Refresh();
-                            while (pq.IsPrinting)
-                            {
-                                pq.Refresh();
-                            }
+                            Thread.Sleep(5000);
                         }
-                        pq.Refresh();
-                        int counter = 10;
-                        while (pq.IsOutOfPaper)
-                        {
-                            if(counter <= 0)
-                            {
-                                if (DialogResult.Cancel == MessageBox.Show("Принтера няма хартия.", "Внимание!", MessageBoxButtons.OKCancel))
-                                {
-                                    return;
-                                }
-                                counter = 10;
-                            }                            
-                            pq.Refresh();
-                            counter--;
-                        }
+                        
                         if (MainForm.PrintCanceled)
                         {
-                            MainForm.LabelText("Print stopping...");
-                            //MessageBox.Show("Принтирането беше прекратено.");
+                            MainForm.LabelText("Print stopped!");
                             return;
                         }
-                        while (pq.IsProcessing || pq.IsPrinting) { pq.Refresh(); }
-                        ch.PrintOutEx(PrintToFile:true, PrToFileName: tempFileToPrint);
-                        pq.AddJob("", tempFileToPrint, false);
-                        pq.Resume();
-                        pq.Refresh();
-
+                        /*
+                        PrintDocument prDoc = new PrintDocument();
+                        string tempPath = Path.GetTempPath() + ch.Name + ".png";
+//                        xlApp.Goto(chObj, true);
+                        chObj.Select();
+                        ch.Export(tempPath, "PNG", false);
+                        prDoc.PrintPage += (sender, args) =>
+                        {
+                            Image i = Image.FromFile(tempPath);
+                            System.Drawing.Point p = new System.Drawing.Point(100, 100);
+                            args.Graphics.DrawImage(i, 10, 10, i.Width, i.Height);
+                        };
+                        prDoc.DefaultPageSettings.Landscape = true;
+                        prDoc.Print();
+                        //*/
+                        ch.PrintOutEx();
                     }                    
                 }
             }
+            xlApp.Visible = false;
             MainForm.LabelText("Print Finished!");
         }
         public void LoadData()
@@ -329,8 +219,30 @@ namespace DixelXlCharts
                 return;
             }
             ChartRange ChRange = null;
-            Range usedRange = xlWSheet.UsedRange;
-            Range firstCol = usedRange.Columns[1];
+            Range usedRange = null;
+            usedRange = xlWSheet.UsedRange;
+            /*try
+            {
+                usedRange = xlWSheet.UsedRange.SpecialCells(XlCellType.xlCellTypeVisible, Type.Missing);
+            }
+            catch(Exception e)
+            {
+                usedRange = xlWSheet.UsedRange;
+                MainForm.LabelText(e.Message);
+            }
+            //Range firstCol = usedRange.Columns[1];
+            Range combinedAreas = null;
+            if (usedRange.Areas.Count > 1)
+            {
+                combinedAreas = usedRange.Areas[1];
+                for (int i = 2; i <= usedRange.Areas.Count; ++i)
+                {
+                    combinedAreas = xlApp.Union(combinedAreas, usedRange.Areas[i]);
+                }
+            }
+            if (combinedAreas != null)
+                usedRange = combinedAreas;
+            //*/
             try
             {
                 ChRange = new ChartRange('H', usedRange, printNeeded, MainForm.SpecialCase);
@@ -361,6 +273,11 @@ namespace DixelXlCharts
                 MainForm.ProgressBar(i, false);
                 if (xlRangeArr[i, 1] == null)
                 {
+                    if (!(i == usedRows))
+                    {
+                        continue;
+                    }
+                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                     continue;
                 }
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
@@ -438,7 +355,7 @@ namespace DixelXlCharts
             Range firstCol;
             try
             {
-                xlChartObjs = xlWSheet.ChartObjects();
+                xlChartObjs = (ChartObjects)xlWSheet.ChartObjects(Type.Missing);
                 usedRange = xlWSheet.UsedRange;
                 firstCol = usedRange.Columns[1];
             }
@@ -481,6 +398,11 @@ namespace DixelXlCharts
                 MainForm.ProgressBar(i, false);
                 if(xlRangeArr[i, 1] == null)
                 {
+                    if (!(i == usedRows))
+                    {
+                        continue;
+                    }
+                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                     continue;
                 }    
                 currDateCell = Convert.ToString(xlRangeArr[i,1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
@@ -612,8 +534,7 @@ namespace DixelXlCharts
                 else
                 {
                     try
-                    {
-                        
+                    {                        
                         xlWBook.SaveAs(MainForm.SaveFilePath,
                                           Type.Missing,
                                           Type.Missing,

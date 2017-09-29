@@ -69,7 +69,15 @@ namespace DixelXlCharts
             Name = type != 0 ? (type == 1 ? Name + "_T" : Name + "_H") : Name;
             DateRange = usedRange.Range[topDateCell, bottomDateCell];
             DataRange = usedRange.Range[topDataCell, bottomDataCell];
-            ChartObject xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
+            ChartObject xlChartObj;
+            try
+            {
+               xlChartObj = xlChartObjs.Add(startChartPositionLeft, startChartPositionTop, chartWidth, chartHeigth);
+            }
+            catch(Exception e)
+            {
+                return;
+            }
             Chart xlChartPage = xlChartObj.Chart;
             Series xlChartSeries = xlChartPage.SeriesCollection().Add(DataRange);
             xlChartSeries.XValues = DateRange;

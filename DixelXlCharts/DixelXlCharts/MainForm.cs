@@ -278,11 +278,21 @@ namespace DixelXlCharts
                     InitialDirectory = saveFileDir ?? Directory.GetCurrentDirectory()
                 };
             }
-            else
+            else if (Path.GetExtension(loadedFile) == ".xlsx")
             {
                 saveFileDialog = new SaveFileDialog
                 {
                     Filter = "Excel Workbook|*.xlsx; *.xlsm",
+                    Title = "Save As",
+                    DefaultExt = ".xlsx",
+                    InitialDirectory = saveFileDir ?? Directory.GetCurrentDirectory()
+                };
+            }
+            else
+            {
+                saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "Excel Workbook|*.xlsx; *.xlsm|Excel 97-2003 Workbook|*.xls",
                     Title = "Save As",
                     DefaultExt = ".xlsx",
                     InitialDirectory = saveFileDir ?? Directory.GetCurrentDirectory()
