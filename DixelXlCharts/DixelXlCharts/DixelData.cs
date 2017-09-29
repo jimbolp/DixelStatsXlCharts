@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
+using Microsoft.Office.Core;
 using System.Globalization;
 using System.Threading;
+using System.Printing;
+using System.Drawing.Printing;
+using System.Drawing;
 
 namespace DixelXlCharts
 {    
@@ -25,6 +27,12 @@ namespace DixelXlCharts
         {
             try
             {
+                xlApp.DisplayAlerts = false;
+                xlApp.ScreenUpdating = false;
+                xlApp.Visible = false;
+                xlApp.UserControl = false;
+                xlApp.Interactive = false;
+                xlApp.FileValidation = MsoFileValidationMode.msoFileValidationSkip;
                 SetSaveDirectory(filePath);
                 printNeeded = print;
                 xlWBooks = xlApp.Workbooks;
@@ -33,18 +41,22 @@ namespace DixelXlCharts
             catch (ArgumentException)
             {
                 MessageBox.Show("Invalid file path!");
+                //xlApp.Quit();
+                Dispose();
                 return;
             }
             catch (NullReferenceException)
             {
-                ReleaseObject(xlWBooks);
-                xlApp.Quit();
-                ReleaseObject(xlApp);
+                Dispose();
                 return;
             }
-            catch (COMException)
+            catch (COMException cEx)
             {
-                throw new Exception("Invalid File Path.. Object was not created..");
+                //xlApp.Quit();
+                Dispose();
+                throw new Exception("Object was not created..: " + 
+                    Environment.NewLine + 
+                    cEx.ToString());
             }
         }
         private void SetSaveDirectory(string path)
@@ -66,12 +78,75 @@ namespace DixelXlCharts
         {
             try
             {
-                xlWBook = xlWBooks.Open(filePath, IgnoreReadOnlyRecommended: true, ReadOnly: false, Editable: true);
+                xlWBook = xlWBooks.Open(filePath, IgnoreReadOnlyRecommended: true, ReadOnly: true, Editable: false);
             }
             catch(COMException)
             {
                 throw;
             }
+        }
+        public void CheckChartsTest()
+        {
+            Sheets xlWSheets;
+            try
+            {
+                xlWSheets = xlWBook.Worksheets;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            MainForm.LabelText("Printing....");
+            if (xlWSheets != null)
+            {
+                ChartObjects chObjs;
+                int iterations = 0;
+                
+                foreach(Worksheet ws in xlWSheets)
+                {
+                    chObjs = ws.ChartObjects();
+                    if (chObjs == null)
+                    {
+                        continue;
+                    }
+                    
+                    foreach(ChartObject chObj in chObjs)
+                    {
+                        iterations++;
+                        Chart ch = chObj.Chart;
+                        
+                        if (iterations >= 3)
+                        {
+                            iterations = 0;
+                            Thread.Sleep(5000);
+                        }
+                        
+                        if (MainForm.PrintCanceled)
+                        {
+                            MainForm.LabelText("Print stopped!");
+                            return;
+                        }
+                        /*
+                        PrintDocument prDoc = new PrintDocument();
+                        string tempPath = Path.GetTempPath() + ch.Name + ".png";
+//                        xlApp.Goto(chObj, true);
+                        chObj.Select();
+                        ch.Export(tempPath, "PNG", false);
+                        prDoc.PrintPage += (sender, args) =>
+                        {
+                            Image i = Image.FromFile(tempPath);
+                            System.Drawing.Point p = new System.Drawing.Point(100, 100);
+                            args.Graphics.DrawImage(i, 10, 10, i.Width, i.Height);
+                        };
+                        prDoc.DefaultPageSettings.Landscape = true;
+                        prDoc.Print();
+                        //*/
+                        ch.PrintOutEx();
+                    }                    
+                }
+            }
+            xlApp.Visible = false;
+            MainForm.LabelText("Print Finished!");
         }
         public void LoadData()
         {
@@ -85,21 +160,17 @@ namespace DixelXlCharts
                 {
                     xlWSheets = xlWBook.Worksheets;
                 }
-                catch (COMException)
-                {
-                    throw;
-                }
                 catch (Exception)
                 {
                     throw;
                 }
-
-                
                 int sheetCount = xlWSheets.Count;
                 int sheetNumber = 1;
                 
                 foreach (Worksheet xlWSheet in xlWSheets)
                 {
+                    if (xlWSheet.UsedRange.Value == null)
+                        continue;
                     if (MainForm.isCancellationRequested)
                     {
                         Dispose();
@@ -148,8 +219,30 @@ namespace DixelXlCharts
                 return;
             }
             ChartRange ChRange = null;
-            Range usedRange = xlWSheet.UsedRange;
-            Range firstCol = usedRange.Columns[1];
+            Range usedRange = null;
+            usedRange = xlWSheet.UsedRange;
+            /*try
+            {
+                usedRange = xlWSheet.UsedRange.SpecialCells(XlCellType.xlCellTypeVisible, Type.Missing);
+            }
+            catch(Exception e)
+            {
+                usedRange = xlWSheet.UsedRange;
+                MainForm.LabelText(e.Message);
+            }
+            //Range firstCol = usedRange.Columns[1];
+            Range combinedAreas = null;
+            if (usedRange.Areas.Count > 1)
+            {
+                combinedAreas = usedRange.Areas[1];
+                for (int i = 2; i <= usedRange.Areas.Count; ++i)
+                {
+                    combinedAreas = xlApp.Union(combinedAreas, usedRange.Areas[i]);
+                }
+            }
+            if (combinedAreas != null)
+                usedRange = combinedAreas;
+            //*/
             try
             {
                 ChRange = new ChartRange('H', usedRange, printNeeded, MainForm.SpecialCase);
@@ -180,6 +273,11 @@ namespace DixelXlCharts
                 MainForm.ProgressBar(i, false);
                 if (xlRangeArr[i, 1] == null)
                 {
+                    if (!(i == usedRows))
+                    {
+                        continue;
+                    }
+                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                     continue;
                 }
                 //MainForm.WriteIntoLabel("Chart " + ChRange.ChartNumber + " ->  Row: " + ChRange.RowOfRange, 1);
@@ -257,7 +355,7 @@ namespace DixelXlCharts
             Range firstCol;
             try
             {
-                xlChartObjs = xlWSheet.ChartObjects();
+                xlChartObjs = (ChartObjects)xlWSheet.ChartObjects(Type.Missing);
                 usedRange = xlWSheet.UsedRange;
                 firstCol = usedRange.Columns[1];
             }
@@ -300,6 +398,11 @@ namespace DixelXlCharts
                 MainForm.ProgressBar(i, false);
                 if(xlRangeArr[i, 1] == null)
                 {
+                    if (!(i == usedRows))
+                    {
+                        continue;
+                    }
+                    ChRange.CreateChart(xlChartObjs, xlWSheet.Name, startChartPositionLeft, startChartPositionTop);
                     continue;
                 }    
                 currDateCell = Convert.ToString(xlRangeArr[i,1]).Split(new char[0], StringSplitOptions.RemoveEmptyEntries)[0].Trim();
@@ -413,6 +516,9 @@ namespace DixelXlCharts
         }
         public void SaveAndClose()
         {
+            MainForm.ProgressBar(0, false);
+            MainForm.ConvProgBar(0, false, 1, 1);
+            //xlApp.Visible = true;
             try
             {
                 MainForm.SaveDialogBox(saveFileDir);
@@ -428,12 +534,26 @@ namespace DixelXlCharts
                 else
                 {
                     try
-                    {
-                        xlWBook.SaveAs(MainForm.SaveFilePath);
+                    {                        
+                        xlWBook.SaveAs(MainForm.SaveFilePath,
+                                          Type.Missing,
+                                          Type.Missing,
+                                          Type.Missing,
+                                          false,
+                                          false,
+                                          XlSaveAsAccessMode.xlExclusive,
+                                          false,
+                                          false,
+                                          Type.Missing,
+                                          Type.Missing,
+                                          Type.Missing);//*/
+                        //xlApp.Visible = false;
+                        while (!xlWBook.Saved) { }
+
                         MessageBox.Show("File saved successfully in \"" + MainForm.SaveFilePath + "\"");
                         xlWBook.Close(false);
                         xlWBooks.Close();
-                        xlApp.Quit();
+                        //xlApp.Quit();
                         Dispose();
                     }
                     catch (COMException)
@@ -472,7 +592,7 @@ namespace DixelXlCharts
             }
             catch (Exception)
             {
-                MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
+                //MessageBox.Show("Unable to close the application or it's already closed! Check Task Manager :D :D");
             }
             ReleaseObject(xlWBook);
             ReleaseObject(xlWBooks);
@@ -483,17 +603,17 @@ namespace DixelXlCharts
             try
             {
                 while (Marshal.ReleaseComObject(obj) > 0) { }
-                    obj = null;                
+                obj = null;
             }
-            catch (COMException cEx)
+            catch (COMException)
             {
                 obj = null;
-                MessageBox.Show("Com Exception Occured while releasing object " + cEx.ToString());
+                //MessageBox.Show("Com Exception Occured while releasing object " + cEx.ToString());
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 obj = null;
-                MessageBox.Show("Exception Occured while releasing object " + ex.ToString());
+                //MessageBox.Show("Exception Occured while releasing object " + ex.ToString());
             }
             finally
             {
