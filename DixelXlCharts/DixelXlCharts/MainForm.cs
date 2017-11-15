@@ -191,7 +191,7 @@ namespace DixelXlCharts
                 MessageBox.Show("The process is already running!!");
                 return;
             }
-            if (!graphicsCheckBox.Checked && !printCheckBox.Checked)
+            if (!graphicsCheckBox.Checked && !printCheckBox.Checked && !alter_chckBox.Checked)
             {
                 DialogResult dr = MessageBox.Show(
                         "Не сте избрали опция за създаване или принтиране на графики!",
@@ -216,8 +216,14 @@ namespace DixelXlCharts
                     try
                     {
                         dxData = new DixelData(filePathTextBox.Text, printCheckBox.Checked);
-                        if(graphicsCheckBox.Checked)
+                        if (alter_chckBox.Checked)
+                        {
+                            dxData.AlterValues();
+                        }
+                        if (graphicsCheckBox.Checked)
+                        {
                             dxData.LoadData();
+                        }
                         if (printCheckBox.Checked)
                         {
                             HideStopBtn(true);

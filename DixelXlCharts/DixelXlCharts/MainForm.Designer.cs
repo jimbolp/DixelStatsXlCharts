@@ -46,6 +46,7 @@
             this.browseFileBtn = new System.Windows.Forms.Button();
             this.savingLabel = new System.Windows.Forms.Label();
             this.stopPrintBtn = new System.Windows.Forms.Button();
+            this.alter_chckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // filePathTextBox
@@ -213,11 +214,22 @@
             this.stopPrintBtn.UseVisualStyleBackColor = true;
             this.stopPrintBtn.Click += new System.EventHandler(this.stopPrintBtn_Click);
             // 
+            // alter_chckBox
+            // 
+            this.alter_chckBox.AutoSize = true;
+            this.alter_chckBox.Location = new System.Drawing.Point(12, 165);
+            this.alter_chckBox.Name = "alter_chckBox";
+            this.alter_chckBox.Size = new System.Drawing.Size(138, 17);
+            this.alter_chckBox.TabIndex = 24;
+            this.alter_chckBox.Text = "Промени стойностите";
+            this.alter_chckBox.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(383, 248);
+            this.Controls.Add(this.alter_chckBox);
             this.Controls.Add(this.stopPrintBtn);
             this.Controls.Add(this.savingLabel);
             this.Controls.Add(this.browseFileBtn);
@@ -260,6 +272,7 @@
         private System.Windows.Forms.Button browseFileBtn;
         private System.Windows.Forms.Label savingLabel;
         private System.Windows.Forms.Button stopPrintBtn;
+        private System.Windows.Forms.CheckBox alter_chckBox;
     }
 }
 
